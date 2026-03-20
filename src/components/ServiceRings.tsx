@@ -1,36 +1,52 @@
 import { arcPath } from '../lib/layout'
 import { SERVICE_DEFINITIONS, ABSENT_COLOR } from '../lib/colors'
 import type { LayoutResult } from '../lib/layout'
+import type { VizPhase } from '../App'
+
+const RING_STAGGER_MS = 120
 
 interface ServiceRingsProps {
   layout: LayoutResult
   cx: number
   cy: number
+  vizPhase: VizPhase
   hoveredStationIndex: number | null
   hoveredRingIndex: number | null
   activeStationIndices: Set<number>
   isInteracting: boolean
+  selectedStationIndex: number | null
   onStationEnter: (index: number) => void
   onStationLeave: () => void
+  onStationSelect?: (index: number) => void
 }
 
 export function ServiceRings({
   layout,
   cx,
   cy,
+  vizPhase,
   hoveredStationIndex,
   hoveredRingIndex,
   activeStationIndices,
   isInteracting,
+  selectedStationIndex,
   onStationEnter,
   onStationLeave,
+  onStationSelect,
 }: ServiceRingsProps) {
   const isStationHover = hoveredStationIndex !== null
   const isRingHover = hoveredRingIndex !== null
   const isSearchActive = activeStationIndices.size > 0
+  const isSelected = selectedStationIndex !== null
+  const isInteractive = vizPhase === 'interactive'
+
+  const groupClass = [
+    isInteracting ? 'rings-interacting' : '',
+    isInteractive ? 'rings-interactive' : '',
+  ].filter(Boolean).join(' ') || undefined
 
   return (
-    <g transform={`translate(${cx},${cy})`} className={isInteracting ? 'rings-interacting' : undefined}>
+    <g transform={`translate(${cx},${cy})`} className={groupClass}>
       {/* Ring separator lines */}
       {layout.rings.map((ring) => (
         <circle
@@ -42,28 +58,26 @@ export function ServiceRings({
         />
       ))}
 
-      {/* Arc segments: iterate stations, each wrapped in a <g> */}
+      {/* Arc segments */}
       {layout.stations.map((station) => {
+        const isThisSelected = station.stationIndex === selectedStationIndex
+        const isThisHovered = station.stationIndex === hoveredStationIndex
+
         let stationOpacity: number
-        if (isStationHover) {
-          stationOpacity = station.stationIndex === hoveredStationIndex ? 1 : 0.08
+        if (isSelected) {
+          stationOpacity = isThisSelected ? 1 : 0.15
+        } else if (isStationHover) {
+          stationOpacity = isThisHovered ? 1 : 0.08
         } else if (isRingHover) {
-          stationOpacity = 1 // per-ring opacity handled per segment below
+          stationOpacity = 1
         } else if (isSearchActive) {
           stationOpacity = activeStationIndices.has(station.stationIndex) ? 1 : 0.08
         } else {
           stationOpacity = 0.85
         }
 
-        // midAngle starts at -π/2 (top) and sweeps clockwise to ~3π/2
-        const entryDelay = ((station.midAngle + Math.PI / 2) / (2 * Math.PI)) * 600
-
         return (
-          <g
-            key={`station-${station.stationIndex}`}
-            className="station-entry"
-            style={{ animationDelay: `${entryDelay}ms` }}
-          >
+          <g key={`station-${station.stationIndex}`}>
             {SERVICE_DEFINITIONS.map((svc, ringIndex) => {
               const ring = layout.rings[ringIndex]
               const hasService = station.services[svc.field] === true
@@ -80,26 +94,42 @@ export function ServiceRings({
               }
 
               const fill = hasService ? svc.color : ABSENT_COLOR
+
               const stroke =
-                isStationHover && station.stationIndex === hoveredStationIndex && hasService
+                (isSelected && isThisSelected && hasService) ||
+                (isStationHover && isThisHovered && hasService)
                   ? 'var(--viz-stroke-hover)'
                   : 'none'
 
               const path = arcPath(ring.innerR, ring.outerR, station.fillStartAngle, station.fillEndAngle)
 
+              // During reveal: ring-reveal class with ring-based delay
+              // During interactive: ring-pulse class for brightness breath
+              const arcClass = vizPhase === 'revealing'
+                ? 'arc-path ring-reveal'
+                : 'arc-path ring-pulse'
+
+              const arcStyle = vizPhase === 'revealing'
+                ? { animationDelay: `${ringIndex * RING_STAGGER_MS}ms` }
+                : { animationDelay: `${ringIndex * 320}ms` }
+
               return (
                 <path
                   key={`${station.stationIndex}-${ringIndex}`}
-                  className="arc-path ring-pulse"
-                  style={{ animationDelay: `${ringIndex * 320}ms` }}
+                  className={arcClass}
+                  style={arcStyle}
                   d={path}
                   fill={fill}
                   stroke={stroke}
                   strokeWidth={0.5}
                   opacity={opacity}
-                  onMouseEnter={() => onStationEnter(station.stationIndex)}
-                  onMouseLeave={onStationLeave}
-                  cursor="crosshair"
+                  onMouseEnter={isInteractive ? () => onStationEnter(station.stationIndex) : undefined}
+                  onMouseLeave={isInteractive ? onStationLeave : undefined}
+                  onClick={isInteractive ? (e) => {
+                    e.stopPropagation()
+                    onStationSelect?.(station.stationIndex)
+                  } : undefined}
+                  cursor={isInteractive ? 'pointer' : 'default'}
                 />
               )
             })}

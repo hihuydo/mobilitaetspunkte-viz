@@ -1,5 +1,5 @@
 // src/App.tsx
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useRadialLayout } from './hooks/useRadialLayout'
 import { RadialViz } from './components/RadialViz'
 import { Sidebar } from './components/Sidebar'
@@ -8,6 +8,9 @@ import { InfoPanel } from './components/InfoPanel'
 import { Button } from '@/components/ui/button'
 import { Info } from 'lucide-react'
 import type { StationGeometry } from './lib/layout'
+import { computeInsights } from './lib/insights'
+
+export type VizPhase = 'loading' | 'revealing' | 'interactive'
 
 export default function App() {
   const svgContainerRef = useRef<HTMLDivElement>(null)
@@ -29,10 +32,58 @@ export default function App() {
 
   const { layout, groups, error } = useRadialLayout(svgDimensions.width, svgDimensions.height)
 
-  // Hover state
+  // VizPhase state machine: loading → revealing → interactive
+  const [vizPhase, setVizPhase] = useState<VizPhase>('loading')
+  const phaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (layout && vizPhase === 'loading') {
+      setVizPhase('revealing')
+      phaseTimerRef.current = setTimeout(() => {
+        setVizPhase('interactive')
+      }, 2400)
+    }
+    return () => {
+      if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current)
+    }
+  }, [layout, vizPhase])
+
+  // Hover state (gated on vizPhase)
   const [hoveredRingIndex, setHoveredRingIndex] = useState<number | null>(null)
   const [hoveredStationIndex, setHoveredStationIndex] = useState<number | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+
+  const handleStationEnter = useCallback((index: number) => {
+    if (vizPhase !== 'interactive') return
+    setHoveredStationIndex(index)
+  }, [vizPhase])
+
+  const handleRingEnter = useCallback((index: number) => {
+    if (vizPhase !== 'interactive') return
+    setHoveredRingIndex(index)
+  }, [vizPhase])
+
+  const handleStationLeave = useCallback(() => setHoveredStationIndex(null), [])
+  const handleRingLeave = useCallback(() => setHoveredRingIndex(null), [])
+
+  // Selected station state
+  const [selectedStationIndex, setSelectedStationIndex] = useState<number | null>(null)
+
+  const handleStationSelect = useCallback((index: number) => {
+    if (vizPhase !== 'interactive') return
+    setSelectedStationIndex((prev) => prev === index ? null : index)
+  }, [vizPhase])
+
+  const handleDeselect = useCallback(() => setSelectedStationIndex(null), [])
+
+  // Esc key to deselect
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedStationIndex(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   // Info panel state
   const [infoPanelVisible, setInfoPanelVisible] = useState(false)
@@ -43,22 +94,43 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeStationIndices, setActiveStationIndices] = useState<Set<number>>(new Set())
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    setMousePos({ x: e.clientX, y: e.clientY })
-  }, [])
-
-  const handleRingLeave = useCallback(() => setHoveredRingIndex(null), [])
-  const handleStationLeave = useCallback(() => setHoveredStationIndex(null), [])
-
   const handleSearch = useCallback((query: string, indices: Set<number>) => {
     setSearchQuery(query)
     setActiveStationIndices(indices)
   }, [])
 
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    setMousePos({ x: e.clientX, y: e.clientY })
+  }, [])
+
+  // Derived: hovered + selected station objects
   const hoveredStation: StationGeometry | null =
     hoveredStationIndex !== null && layout
       ? (layout.stations.find((s) => s.stationIndex === hoveredStationIndex) ?? null)
       : null
+
+  const selectedStation: StationGeometry | null =
+    selectedStationIndex !== null && layout
+      ? (layout.stations.find((s) => s.stationIndex === selectedStationIndex) ?? null)
+      : null
+
+  const hoveredStationName: string | null = hoveredStation?.name ?? null
+
+  // Idle state: no hover, no selection, no search, fully interactive
+  const isIdle =
+    vizPhase === 'interactive' &&
+    selectedStationIndex === null &&
+    hoveredStationIndex === null &&
+    hoveredRingIndex === null &&
+    searchQuery === ''
+
+  const searchMatchCount = activeStationIndices.size
+
+  // Insights — computed once when layout is available
+  const insights = useMemo(() => {
+    if (!layout) return []
+    return computeInsights(layout.stations)
+  }, [layout])
 
   if (error) {
     return (
@@ -78,12 +150,21 @@ export default function App() {
             groups={groups}
             width={svgDimensions.width}
             height={svgDimensions.height}
+            vizPhase={vizPhase}
             hoveredRingIndex={hoveredRingIndex}
             hoveredStationIndex={hoveredStationIndex}
             activeStationIndices={activeStationIndices}
             isInteracting={hoveredStationIndex !== null || hoveredRingIndex !== null}
-            onStationEnter={setHoveredStationIndex}
+            selectedStationIndex={selectedStationIndex}
+            selectedStation={selectedStation}
+            hoveredStationName={hoveredStationName}
+            isIdle={isIdle}
+            insights={insights}
+            searchMatchCount={searchMatchCount}
+            onStationEnter={handleStationEnter}
             onStationLeave={handleStationLeave}
+            onStationSelect={handleStationSelect}
+            onDeselect={handleDeselect}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
@@ -114,7 +195,7 @@ export default function App() {
         onSearch={handleSearch}
         hoveredRingIndex={hoveredRingIndex}
         isStationHover={hoveredStationIndex !== null}
-        onRingEnter={setHoveredRingIndex}
+        onRingEnter={handleRingEnter}
         onRingLeave={handleRingLeave}
       />
 

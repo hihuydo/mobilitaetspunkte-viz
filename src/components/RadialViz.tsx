@@ -1,7 +1,8 @@
 import { useCallback } from 'react'
 import type { StationGroup } from '../lib/parseData'
 import { SERVICE_DEFINITIONS } from '../lib/colors'
-import type { LayoutResult } from '../lib/layout'
+import type { LayoutResult, StationGeometry } from '../lib/layout'
+import type { VizPhase } from '../App'
 import { ServiceRings } from './ServiceRings'
 import { StationLabels } from './StationLabels'
 import { GroupMarkers } from './GroupMarkers'
@@ -12,12 +13,21 @@ interface RadialVizProps {
   groups: StationGroup[]
   width: number
   height: number
+  vizPhase: VizPhase
   hoveredRingIndex: number | null
   hoveredStationIndex?: number | null
   activeStationIndices: Set<number>
   isInteracting?: boolean
+  selectedStationIndex?: number | null
+  selectedStation?: StationGeometry | null
+  hoveredStationName?: string | null
+  isIdle?: boolean
+  insights?: string[]
+  searchMatchCount?: number
   onStationEnter?: (index: number) => void
   onStationLeave?: () => void
+  onStationSelect?: (index: number) => void
+  onDeselect?: () => void
 }
 
 export function RadialViz({
@@ -25,14 +35,22 @@ export function RadialViz({
   groups: _groups,
   width,
   height,
+  vizPhase,
   hoveredRingIndex,
   hoveredStationIndex: hoveredStationIndexProp,
   activeStationIndices,
   isInteracting = false,
+  selectedStationIndex = null,
+  selectedStation = null,
+  hoveredStationName = null,
+  isIdle = false,
+  insights = [],
+  searchMatchCount = 0,
   onStationEnter,
   onStationLeave,
+  onStationSelect,
+  onDeselect,
 }: RadialVizProps) {
-  // Fully controlled: parent always passes hoveredStationIndex
   const hoveredStationIndex = hoveredStationIndexProp ?? null
 
   const handleStationEnter = useCallback((index: number) => {
@@ -56,6 +74,7 @@ export function RadialViz({
       width={width}
       height={height}
       style={{ display: 'block', background: 'var(--viz-bg)' }}
+      onClick={onDeselect}
     >
       {/* Star field */}
       <g transform={`translate(${cx},${cy})`}>
@@ -79,12 +98,15 @@ export function RadialViz({
         layout={layout}
         cx={cx}
         cy={cy}
+        vizPhase={vizPhase}
         hoveredStationIndex={hoveredStationIndex}
         hoveredRingIndex={hoveredRingIndex}
         activeStationIndices={activeStationIndices}
         isInteracting={isInteracting}
+        selectedStationIndex={selectedStationIndex}
         onStationEnter={handleStationEnter}
         onStationLeave={handleStationLeave}
+        onStationSelect={onStationSelect}
       />
 
       {/* Station labels */}
@@ -92,9 +114,11 @@ export function RadialViz({
         layout={layout}
         cx={cx}
         cy={cy}
+        vizPhase={vizPhase}
         hoveredStationIndex={hoveredStationIndex}
         isRingHover={hoveredRingIndex !== null}
         activeStationIndices={activeStationIndices}
+        selectedStationIndex={selectedStationIndex}
         onStationEnter={handleStationEnter}
         onStationLeave={handleStationLeave}
       />
@@ -105,6 +129,11 @@ export function RadialViz({
         cy={cy}
         r={layout.centerR}
         hoveredRingLabel={hoveredRingLabel}
+        hoveredStationName={hoveredStationName}
+        selectedStation={selectedStation}
+        isIdle={isIdle}
+        insights={insights}
+        searchMatchCount={searchMatchCount}
       />
     </svg>
   )

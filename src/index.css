@@ -185,20 +185,25 @@ svg text {
   transition: opacity 150ms ease-out;
 }
 
-/* Entry stagger: stations fade in ordered by angular position */
-@keyframes station-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Ring-by-ring reveal: arc-level, staggered by ring index */
+@keyframes ring-reveal {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-.station-entry {
-  animation: station-fade-in 600ms ease-out both;
+.ring-reveal {
+  opacity: 0;
+  animation: ring-reveal 400ms ease-out forwards;
+}
+
+/* Station label entry: deferred until after ring reveal completes */
+@keyframes station-label-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.station-label-entry {
+  animation: station-label-in 600ms ease-out both;
 }
 
 /* Ring pulse: gentle brightness breath per arc segment */
@@ -207,11 +212,12 @@ svg text {
   50% { filter: brightness(1.15); }
 }
 
-.ring-pulse {
+/* Pulse only active after reveal completes (.rings-interactive added by React) */
+.rings-interactive .ring-pulse {
   animation: ring-pulse 3.5s ease-in-out infinite;
 }
 
 /* Freeze pulse during any hover interaction */
-.rings-interacting .ring-pulse {
+.rings-interacting.rings-interactive .ring-pulse {
   animation-play-state: paused;
 }
