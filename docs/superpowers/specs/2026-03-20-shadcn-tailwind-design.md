@@ -95,17 +95,43 @@ Update `src/main.tsx` to import `'./index.css'` instead of `'./App.css'`.
 document.documentElement.classList.add('dark')
 ```
 
+### Order of operations (critical)
+
+Execute setup steps in this exact order:
+1. Rename `src/App.css` → `src/index.css`, update `main.tsx` import
+2. Update `package.json` `pnpm.onlyBuiltDependencies`, run `pnpm install`
+3. `pnpm add -D @tailwindcss/vite`, update `vite.config.ts`
+4. `pnpm dlx shadcn@latest init` — will prompt for CSS file path, answer `src/index.css`
+5. `pnpm dlx shadcn@latest add button card input separator`
+6. `pnpm add lucide-react`
+
 ### shadcn init
 
 Run: `pnpm dlx shadcn@latest init`
 - Style: **zinc**
 - Base color: **zinc**
 - Dark mode: **class** strategy
+- CSS file: **`src/index.css`** (answer this when prompted — must be renamed first)
 
 This generates:
 - `src/lib/utils.ts` — `cn()` helper (clsx + tailwind-merge)
 - `components.json` — shadcn config
-- CSS variables appended to `src/index.css` (inside a `@layer base` block with `:root` and `.dark` selectors)
+- CSS variables appended to `src/index.css` inside `@layer base` with `:root` and `.dark` selectors
+- `@layer base { body { @apply bg-background text-foreground; } }` — this sets global text color and background via CSS variables, replacing the removed hardcoded `color: #c9d8e8` from `App.css`. shadcn init handles this automatically.
+
+**Font family:** shadcn's `@layer base` does not explicitly set `font-family` on `body`. Add to `src/index.css` after `@import "tailwindcss"`:
+```css
+@layer base {
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+}
+```
+SVG `<text>` elements in this project set `fontFamily` via SVG attributes — they are unaffected.
+
+### lucide-react
+
+`pnpm add lucide-react` (step 6 above). Do not rely on shadcn to install it implicitly.
 
 ### shadcn Components to Install
 
@@ -206,11 +232,12 @@ Clear button (appears when `inputValue` non-empty):
 
 "Meinst du?" suggestion container: `className="mt-2 space-y-1"`
 
-Each suggestion:
+Each suggestion (trailing `?` is preserved — do not drop it):
 ```tsx
 <Button variant="ghost" className="w-full justify-start text-sm h-auto py-1 px-2">
   <span className="text-muted-foreground">Meinst du: </span>
   <span className="text-foreground font-medium ml-1">{station.name}</span>
+  <span className="text-muted-foreground">?</span>
 </Button>
 ```
 
@@ -287,6 +314,12 @@ Label:
   {svc.label}
 </span>
 ```
+
+---
+
+## Out of Scope
+
+- `App.tsx` error state (`if (error) return ...`) — the inline styles on the error branch are left as-is. This is a dev-only error boundary, not user-facing chrome.
 
 ---
 
