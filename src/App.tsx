@@ -4,6 +4,7 @@ import { useRadialLayout } from './hooks/useRadialLayout'
 import { RadialViz } from './components/RadialViz'
 import { Sidebar } from './components/Sidebar'
 import { Tooltip } from './components/Tooltip'
+import { InfoPanel } from './components/InfoPanel'
 import type { StationGeometry } from './lib/layout'
 
 export default function App() {
@@ -30,6 +31,11 @@ export default function App() {
   const [hoveredRingIndex, setHoveredRingIndex] = useState<number | null>(null)
   const [hoveredStationIndex, setHoveredStationIndex] = useState<number | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+
+  // Info panel state
+  const [infoPanelVisible, setInfoPanelVisible] = useState(true)
+  const handleInfoPanelClose = useCallback(() => setInfoPanelVisible(false), [])
+  const handleInfoPanelOpen = useCallback(() => setInfoPanelVisible(true), [])
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('')
@@ -99,6 +105,35 @@ export default function App() {
           >
             Lade Daten…
           </div>
+        )}
+
+        {/* Info panel overlay */}
+        {infoPanelVisible ? (
+          <InfoPanel onClose={handleInfoPanelClose} />
+        ) : (
+          <button
+            onClick={handleInfoPanelOpen}
+            title="Legende anzeigen"
+            style={{
+              position: 'absolute',
+              top: 16,
+              left: 16,
+              width: 28,
+              height: 28,
+              background: 'rgba(10, 18, 32, 0.94)',
+              border: '1px solid #1a2a45',
+              borderRadius: '50%',
+              color: '#4a7fa8',
+              fontSize: 13,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10,
+            }}
+          >
+            ℹ
+          </button>
         )}
       </div>
 
