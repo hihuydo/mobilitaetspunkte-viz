@@ -3,6 +3,7 @@ import { useRadialLayout } from './hooks/useRadialLayout'
 import { RadialViz } from './components/RadialViz'
 import { Legend } from './components/Legend'
 import { Tooltip } from './components/Tooltip'
+import { InfoPanel } from './components/InfoPanel'
 import type { StationGeometry } from './lib/layout'
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
   const [hoveredRingIndex, setHoveredRingIndex] = useState<number | null>(null)
   const [hoveredStationIndex, setHoveredStationIndex] = useState<number | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [infoPanelVisible, setInfoPanelVisible] = useState(true)
 
   // Track mouse position for tooltip
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -91,6 +93,9 @@ export default function App() {
           >
             Lade Daten…
           </div>
+        )}
+        {infoPanelVisible && (
+          <InfoPanel onClose={() => setInfoPanelVisible(false)} />
         )}
       </div>
 
