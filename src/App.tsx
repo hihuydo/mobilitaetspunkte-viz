@@ -1,12 +1,12 @@
+// src/App.tsx
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useRadialLayout } from './hooks/useRadialLayout'
 import { RadialViz } from './components/RadialViz'
-import { Legend } from './components/Legend'
+import { Sidebar } from './components/Sidebar'
 import { Tooltip } from './components/Tooltip'
 import type { StationGeometry } from './lib/layout'
 
 export default function App() {
-  // Measure SVG container dimensions here in App — hook accepts them as params
   const svgContainerRef = useRef<HTMLDivElement>(null)
   const [svgDimensions, setSvgDimensions] = useState({ width: 0, height: 0 })
 
@@ -26,12 +26,15 @@ export default function App() {
 
   const { layout, groups, error } = useRadialLayout(svgDimensions.width, svgDimensions.height)
 
-  // Hover state — lifted here so Legend and RadialViz can share it
+  // Hover state
   const [hoveredRingIndex, setHoveredRingIndex] = useState<number | null>(null)
   const [hoveredStationIndex, setHoveredStationIndex] = useState<number | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
 
-  // Track mouse position for tooltip
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [activeStationIndices, setActiveStationIndices] = useState<Set<number>>(new Set())
+
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     setMousePos({ x: e.clientX, y: e.clientY })
   }, [])
@@ -39,7 +42,11 @@ export default function App() {
   const handleRingLeave = useCallback(() => setHoveredRingIndex(null), [])
   const handleStationLeave = useCallback(() => setHoveredStationIndex(null), [])
 
-  // Find hovered station geometry for tooltip
+  const handleSearch = useCallback((query: string, indices: Set<number>) => {
+    setSearchQuery(query)
+    setActiveStationIndices(indices)
+  }, [])
+
   const hoveredStation: StationGeometry | null =
     hoveredStationIndex !== null && layout
       ? (layout.stations.find((s) => s.stationIndex === hoveredStationIndex) ?? null)
@@ -57,13 +64,13 @@ export default function App() {
     <div
       style={{
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
         height: '100vh',
         background: '#0f1b2d',
       }}
       onMouseMove={handleMouseMove}
     >
-      {/* SVG container — flex:1, takes all space above legend */}
+      {/* SVG container — flex:1, full height */}
       <div ref={svgContainerRef} style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
         {layout && svgDimensions.width > 0 && svgDimensions.height > 0 ? (
           <RadialViz
@@ -73,7 +80,7 @@ export default function App() {
             height={svgDimensions.height}
             hoveredRingIndex={hoveredRingIndex}
             hoveredStationIndex={hoveredStationIndex}
-            activeStationIndices={new Set<number>()}
+            activeStationIndices={activeStationIndices}
             onStationEnter={setHoveredStationIndex}
             onStationLeave={handleStationLeave}
           />
@@ -95,8 +102,11 @@ export default function App() {
         )}
       </div>
 
-      {/* Legend strip */}
-      <Legend
+      {/* Right sidebar */}
+      <Sidebar
+        stations={layout ? layout.stations : []}
+        searchQuery={searchQuery}
+        onSearch={handleSearch}
         hoveredRingIndex={hoveredRingIndex}
         isStationHover={hoveredStationIndex !== null}
         onRingEnter={setHoveredRingIndex}
