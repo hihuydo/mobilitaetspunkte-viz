@@ -62,7 +62,7 @@ export default function App() {
 
   if (error) {
     return (
-      <div style={{ color: '#cc4444', padding: 32, fontFamily: 'monospace' }}>
+      <div className="p-8 text-destructive font-mono">
         Error loading data: {error}
       </div>
     )
