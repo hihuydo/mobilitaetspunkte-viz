@@ -14,57 +14,45 @@ export function Legend({
   onRingLeave,
 }: LegendProps) {
   const isRingHover = hoveredRingIndex !== null
+  // Numeric opacity is acceptable as a literal (semantic: 50% idle / 100% active)
   const containerOpacity = isRingHover || isStationHover ? 1 : 0.5
 
   return (
     <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        justifyContent: 'flex-start',
-        gap: 4,
-        padding: 0,
-        opacity: containerOpacity,
-        transition: 'opacity 150ms ease-out',
-        fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-      }}
+      className="flex flex-col gap-1 transition-opacity duration-150"
+      style={{ opacity: containerOpacity }}
     >
-      {/* Items list — vertical */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="flex flex-col gap-2">
         {SERVICE_DEFINITIONS.map((svc, i) => {
           const isHovered = hoveredRingIndex === i
+
+          // CSS custom properties — no hex literals.
+          // --color-legend-label is defined as bare HSL channels (e.g. "210 55% 70%")
+          // enabling the hsl(var(...) / 0.4) opacity composition syntax.
           const labelColor = isHovered
-            ? '#c9d8e8'
+            ? 'hsl(var(--color-legend-label-active))'
             : isRingHover
-            ? 'rgba(138, 180, 212, 0.4)'
-            : '#8ab4d4'
+            ? 'hsl(var(--color-legend-label) / 0.4)'
+            : 'hsl(var(--color-legend-label))'
 
           return (
             <div
               key={svc.field}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
+              className="flex items-center gap-1.5 cursor-pointer"
               onMouseEnter={() => onRingEnter(i)}
               onMouseLeave={onRingLeave}
             >
+              {/* svc.color = data-encoding visualization color from colors.ts — not a design token */}
               <div
+                className="w-2.5 h-2.5 rounded-full shrink-0 transition-opacity duration-150"
                 style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: '50%',
                   background: svc.color,
-                  flexShrink: 0,
                   opacity: isRingHover && !isHovered ? 0.4 : 1,
-                  transition: 'opacity 150ms ease-out',
                 }}
               />
               <span
-                style={{
-                  fontSize: 12,
-                  color: labelColor,
-                  transition: 'color 150ms ease-out',
-                  userSelect: 'none',
-                }}
+                className="text-xs select-none transition-colors duration-150"
+                style={{ color: labelColor }}
               >
                 {svc.label}
               </span>
