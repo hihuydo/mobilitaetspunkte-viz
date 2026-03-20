@@ -19,7 +19,9 @@ export function StationLabels({
   onStationEnter,
   onStationLeave,
 }: StationLabelsProps) {
-  const R = layout.labelR
+  const labelR = layout.labelR
+  const connectorInnerR = layout.ringZoneOuterR
+  const connectorOuterR = layout.labelR
 
   return (
     <g transform={`translate(${cx},${cy})`}>
@@ -39,6 +41,9 @@ export function StationLabels({
           fill = '#6a94b0'
         }
 
+        const cos = Math.cos(station.midAngle)
+        const sin = Math.sin(station.midAngle)
+
         // SVG transform strategy:
         // rotate(angleDeg) — spin to face the spoke
         // translate(R, 0)  — move out along the (now-rotated) x-axis
@@ -46,30 +51,44 @@ export function StationLabels({
         const angleDeg = (station.midAngle * 180) / Math.PI
 
         const transform = station.labelFlip
-          ? `rotate(${angleDeg}) translate(${R}, 0) rotate(180)`
-          : `rotate(${angleDeg}) translate(${R}, 0)`
+          ? `rotate(${angleDeg}) translate(${labelR}, 0) rotate(180)`
+          : `rotate(${angleDeg}) translate(${labelR}, 0)`
 
         return (
-          <text
-            key={station.stationIndex}
-            transform={transform}
-            textAnchor={station.labelAnchor}
-            dominantBaseline="middle"
-            fontSize="clamp(5.5px, 0.8vw, 8px)"
-            fontWeight={300}
-            fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif"
-            fill={fill}
-            opacity={opacity}
-            style={{
-              transition: 'opacity 150ms ease-out, fill 150ms ease-out',
-              cursor: 'default',
-              userSelect: 'none',
-            }}
-            onMouseEnter={() => onStationEnter(station.stationIndex)}
-            onMouseLeave={onStationLeave}
-          >
-            {station.name}
-          </text>
+          <g key={station.stationIndex}>
+            {/* Connector line from outer ring edge to label start */}
+            <line
+              x1={connectorInnerR * cos}
+              y1={connectorInnerR * sin}
+              x2={connectorOuterR * cos}
+              y2={connectorOuterR * sin}
+              stroke={fill}
+              strokeWidth={0.5}
+              opacity={opacity}
+              style={{ transition: 'opacity 150ms ease-out, stroke 150ms ease-out' }}
+              onMouseEnter={() => onStationEnter(station.stationIndex)}
+              onMouseLeave={onStationLeave}
+            />
+            <text
+              transform={transform}
+              textAnchor={station.labelAnchor}
+              dominantBaseline="middle"
+              fontSize="clamp(5.5px, 0.8vw, 8px)"
+              fontWeight={300}
+              fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif"
+              fill={fill}
+              opacity={opacity}
+              style={{
+                transition: 'opacity 150ms ease-out, fill 150ms ease-out',
+                cursor: 'default',
+                userSelect: 'none',
+              }}
+              onMouseEnter={() => onStationEnter(station.stationIndex)}
+              onMouseLeave={onStationLeave}
+            >
+              {station.name}
+            </text>
+          </g>
         )
       })}
     </g>
