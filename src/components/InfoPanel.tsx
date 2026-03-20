@@ -15,7 +15,7 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
         background: 'rgba(10, 18, 32, 0.94)',
         border: '1px solid #1a2a45',
         borderRadius: 8,
-        padding: '14px 16px',
+        padding: '20px',
         backdropFilter: 'blur(4px)',
         boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
         fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
@@ -27,12 +27,12 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
         onClick={onClose}
         style={{
           position: 'absolute',
-          top: 8,
-          right: 10,
+          top: 10,
+          right: 12,
           background: 'none',
           border: 'none',
           color: '#4a7fa8',
-          fontSize: 14,
+          fontSize: 16,
           lineHeight: 1,
           cursor: 'pointer',
           padding: 0,
@@ -48,8 +48,8 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
           fontWeight: 600,
           color: '#c9d8e8',
           letterSpacing: '0.5px',
-          marginBottom: 10,
-          paddingRight: 16,
+          marginBottom: 16,
+          paddingRight: 20,
         }}
       >
         So liest du diese Grafik
@@ -62,7 +62,7 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
           color: '#4a7fa8',
           letterSpacing: '1px',
           textTransform: 'uppercase',
-          marginBottom: 4,
+          marginBottom: 8,
         }}
       >
         Was du siehst
@@ -71,8 +71,8 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
         style={{
           fontSize: 16,
           color: '#6a94b0',
-          lineHeight: 1.55,
-          marginBottom: 10,
+          lineHeight: 1.6,
+          marginBottom: 20,
         }}
       >
         116 Münchner{' '}
@@ -98,12 +98,12 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
           color: '#4a7fa8',
           letterSpacing: '1px',
           textTransform: 'uppercase',
-          marginBottom: 4,
+          marginBottom: 8,
         }}
       >
         Wie erkunden
       </div>
-      <div style={{ fontSize: 11, color: '#6a94b0', lineHeight: 1.6 }}>
+      <div style={{ fontSize: 16, color: '#6a94b0', lineHeight: 1.6 }}>
         <span style={{ color: '#8ab4d4' }}>↗ Strich hovern</span> — Details zur Station:
         Adresse, alle vorhandenen Dienste, Anzahl Carsharing-Plätze.
         <br />
