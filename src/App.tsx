@@ -73,6 +73,7 @@ export default function App() {
             height={svgDimensions.height}
             hoveredRingIndex={hoveredRingIndex}
             hoveredStationIndex={hoveredStationIndex}
+            activeStationIndices={new Set<number>()}
             onStationEnter={setHoveredStationIndex}
             onStationLeave={handleStationLeave}
           />

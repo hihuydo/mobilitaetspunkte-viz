@@ -8,6 +8,7 @@ interface ServiceRingsProps {
   cy: number
   hoveredStationIndex: number | null
   hoveredRingIndex: number | null
+  activeStationIndices: Set<number>
   onStationEnter: (index: number) => void
   onStationLeave: () => void
 }
@@ -18,11 +19,13 @@ export function ServiceRings({
   cy,
   hoveredStationIndex,
   hoveredRingIndex,
+  activeStationIndices,
   onStationEnter,
   onStationLeave,
 }: ServiceRingsProps) {
   const isStationHover = hoveredStationIndex !== null
   const isRingHover = hoveredRingIndex !== null
+  const isSearchActive = activeStationIndices.size > 0
 
   return (
     <g transform={`translate(${cx},${cy})`}>
@@ -44,6 +47,8 @@ export function ServiceRings({
           stationOpacity = station.stationIndex === hoveredStationIndex ? 1 : 0.08
         } else if (isRingHover) {
           stationOpacity = 1 // per-ring opacity handled per segment below
+        } else if (isSearchActive) {
+          stationOpacity = activeStationIndices.has(station.stationIndex) ? 1 : 0.08
         } else {
           stationOpacity = 0.85
         }

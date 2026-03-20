@@ -6,6 +6,7 @@ interface StationLabelsProps {
   cy: number
   hoveredStationIndex: number | null
   isRingHover: boolean
+  activeStationIndices: Set<number>
   onStationEnter: (index: number) => void
   onStationLeave: () => void
 }
@@ -16,10 +17,12 @@ export function StationLabels({
   cy,
   hoveredStationIndex,
   isRingHover,
+  activeStationIndices,
   onStationEnter,
   onStationLeave,
 }: StationLabelsProps) {
   const R = layout.labelR
+  const isSearchActive = activeStationIndices.size > 0
 
   return (
     <g transform={`translate(${cx},${cy})`}>
@@ -34,6 +37,10 @@ export function StationLabels({
         } else if (isRingHover) {
           opacity = 0.3
           fill = '#6a94b0'
+        } else if (isSearchActive) {
+          const isMatch = activeStationIndices.has(station.stationIndex)
+          opacity = isMatch ? 1 : 0.08
+          fill = isMatch ? '#c9d8e8' : '#6a94b0'
         } else {
           opacity = 1
           fill = '#6a94b0'

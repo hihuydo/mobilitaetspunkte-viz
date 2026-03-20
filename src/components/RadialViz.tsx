@@ -14,6 +14,7 @@ interface RadialVizProps {
   height: number
   hoveredRingIndex: number | null
   hoveredStationIndex?: number | null
+  activeStationIndices: Set<number>
   onStationEnter?: (index: number) => void
   onStationLeave?: () => void
 }
@@ -25,6 +26,7 @@ export function RadialViz({
   height,
   hoveredRingIndex,
   hoveredStationIndex: hoveredStationIndexProp,
+  activeStationIndices,
   onStationEnter,
   onStationLeave,
 }: RadialVizProps) {
@@ -77,6 +79,7 @@ export function RadialViz({
         cy={cy}
         hoveredStationIndex={hoveredStationIndex}
         hoveredRingIndex={hoveredRingIndex}
+        activeStationIndices={activeStationIndices}
         onStationEnter={handleStationEnter}
         onStationLeave={handleStationLeave}
       />
@@ -88,6 +91,7 @@ export function RadialViz({
         cy={cy}
         hoveredStationIndex={hoveredStationIndex}
         isRingHover={hoveredRingIndex !== null}
+        activeStationIndices={activeStationIndices}
         onStationEnter={handleStationEnter}
         onStationLeave={handleStationLeave}
       />
