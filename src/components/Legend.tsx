@@ -19,7 +19,7 @@ export function Legend({
   return (
     <div
       style={{
-        height: 48,
+        minHeight: 48,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',

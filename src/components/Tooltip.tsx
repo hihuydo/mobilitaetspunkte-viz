@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { SERVICE_DEFINITIONS } from '../lib/colors'
 import type { StationGeometry } from '../lib/layout'
@@ -10,24 +9,20 @@ interface TooltipProps {
 }
 
 export function Tooltip({ station, mouseX, mouseY }: TooltipProps) {
-  const [pos, setPos] = useState({ x: mouseX, y: mouseY })
+  if (station === null) return null
 
-  useEffect(() => {
-    if (station === null) return
-    const OFFSET = 12
-    const W = 220
-    const H = 180
+  // Compute clamped position inline — pure math, no useEffect needed
+  const OFFSET = 12
+  const W = 220
+  const H = 180
 
-    let x = mouseX + OFFSET
-    let y = mouseY + OFFSET
+  let x = mouseX + OFFSET
+  let y = mouseY + OFFSET
 
+  if (typeof window !== 'undefined') {
     if (x + W > window.innerWidth) x = mouseX - W - OFFSET
     if (y + H > window.innerHeight) y = mouseY - H - OFFSET
-
-    setPos({ x, y })
-  }, [mouseX, mouseY, station])
-
-  if (station === null) return null
+  }
 
   const activeServices = SERVICE_DEFINITIONS.filter(
     (svc) => station.services[svc.field] === true,
@@ -37,8 +32,8 @@ export function Tooltip({ station, mouseX, mouseY }: TooltipProps) {
     <div
       style={{
         position: 'fixed',
-        left: pos.x,
-        top: pos.y,
+        left: x,
+        top: y,
         background: '#0a1220',
         border: '1px solid #1a2a45',
         borderRadius: 6,
