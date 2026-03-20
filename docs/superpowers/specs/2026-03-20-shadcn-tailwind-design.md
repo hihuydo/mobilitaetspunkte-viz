@@ -28,37 +28,84 @@ No changes to: `d3`, `papaparse`, `vitest`, `vite`, `typescript`.
 
 Install: `pnpm add -D @tailwindcss/vite`
 
-`vite.config.ts` — add plugin:
+`vite.config.ts` imports from `vitest/config` (which re-exports `vite/config`). The Tailwind plugin is added to the existing plugins array — this works correctly with `vitest/config`:
+
 ```ts
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test-setup.ts'],
+    globals: true,
+  },
 })
 ```
 
-`src/index.css` (rename from `App.css` if needed, or create):
+**Do NOT split into separate `vite.config.ts` + `vitest.config.ts`** — the single file already works.
+
+### App.css → index.css migration
+
+`src/App.css` must be migrated. It contains:
+1. `html, body, #root { background: #0f1b2d; color: #c9d8e8; overflow: hidden; }` — hardcoded colors will override shadcn's CSS variables and break the theme. These must be removed.
+2. `overflow: hidden` on `html, body, #root` — **load-bearing**: prevents page scroll on the full-viewport visualization. Must be preserved.
+3. `*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }` — keep.
+4. `svg text { -webkit-font-smoothing: antialiased; }` — keep.
+5. `.arc-path { transition: opacity 150ms ease-out; }` — keep.
+
+**Action:** Rename `src/App.css` → `src/index.css`. Replace contents with:
+
 ```css
 @import "tailwindcss";
+
+/* shadcn CSS variables are injected here by `shadcn init` */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+svg text {
+  -webkit-font-smoothing: antialiased;
+}
+
+.arc-path {
+  transition: opacity 150ms ease-out;
+}
 ```
 
-No `tailwind.config.js` needed with v4 — configuration is CSS-first.
+Update `src/main.tsx` to import `'./index.css'` instead of `'./App.css'`.
+
+**Note:** `tsconfig.app.json` already has `"noUncheckedSideEffectImports": false` — the CSS import works without changes.
+
+### Dark mode
+
+`main.tsx` must add `dark` class to `<html>` so shadcn's dark CSS variables activate:
+```tsx
+document.documentElement.classList.add('dark')
+```
 
 ### shadcn init
 
 Run: `pnpm dlx shadcn@latest init`
 - Style: **zinc**
 - Base color: **zinc**
-- Dark mode: **class** strategy (add `dark` class to `<html>`)
+- Dark mode: **class** strategy
 
 This generates:
 - `src/lib/utils.ts` — `cn()` helper (clsx + tailwind-merge)
 - `components.json` — shadcn config
-- CSS variables injected into `src/index.css`
-
-`main.tsx` must add `dark` class to `<html>`:
-```tsx
-document.documentElement.classList.add('dark')
-```
+- CSS variables appended to `src/index.css` (inside a `@layer base` block with `:root` and `.dark` selectors)
 
 ### shadcn Components to Install
 
@@ -72,13 +119,25 @@ Components added to `src/components/ui/`:
 - `input.tsx`
 - `separator.tsx`
 
+### pnpm onlyBuiltDependencies
+
+`@tailwindcss/vite` uses `lightningcss` which has a native binary. Add it to `package.json`:
+```json
+"pnpm": {
+  "onlyBuiltDependencies": ["esbuild", "lightningcss"]
+}
+```
+Run `pnpm install` after updating this.
+
 ---
 
 ## Global Layout
 
-`App.tsx` root div:
-- Remove `background: '#0f1b2d'` — replaced by `bg-background` (shadcn dark zinc CSS variable)
-- Remove `display: 'flex'`, `flexDirection: 'row'`, `height: '100vh'` — replaced with `flex flex-row h-screen`
+`App.tsx` root div: replace all inline styles with `className="flex flex-row h-screen bg-background"`.
+
+SVG container div (flex:1): `className="flex-1 relative overflow-hidden"`.
+
+Loading div: `className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground"`.
 
 ---
 
@@ -88,22 +147,34 @@ Components added to `src/components/ui/`:
 
 - Root div: `className="flex flex-row h-screen bg-background"`
 - SVG container div: `className="flex-1 relative overflow-hidden"`
-- Loading div: `className="absolute inset-0 flex items-center justify-center text-sm"` + Tailwind color class
-- ℹ re-open button: replace raw `<button>` with shadcn `<Button variant="outline" size="icon">` + lucide `<Info>` icon. Position: `className="absolute top-4 left-4 z-10"`
+- Loading div: `className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground"`
+- ℹ re-open button: replace raw `<button>` with shadcn `<Button variant="outline" size="icon" className="absolute top-4 left-4 z-10">` + lucide `<Info size={18} />`
 
 ### `InfoPanel.tsx`
 
-Outer wrapper: `position: absolute`, `top: 16`, `left: 16`, `width: 280`, `maxHeight: calc(100% - 32px)`, `overflowY: auto`, `zIndex: 10` — keep as inline style OR use `className="absolute top-4 left-4 w-[280px] max-h-[calc(100%-32px)] overflow-y-auto z-10"`.
+**Component tree structure** (critical for sticky header + scroll to work correctly):
 
-Outer shell: replace raw `<div>` with shadcn `<Card>` — gets `bg-card border border-border rounded-lg shadow-lg backdrop-blur-sm` automatically.
+```
+<Card className="absolute top-4 left-4 w-[280px] max-h-[calc(100%-32px)] overflow-y-auto z-10 backdrop-blur-sm">
+  {/* Sticky header — direct child of Card, before CardContent */}
+  <div className="sticky top-0 bg-card/95 border-b border-border px-5 py-4 z-10">
+    <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={onClose}>
+      <X size={16} />
+    </Button>
+    <div className="text-base font-semibold text-foreground tracking-wide pr-5">
+      So liest du diese Grafik
+    </div>
+  </div>
+  {/* Scrollable body */}
+  <CardContent className="px-5 py-4 space-y-5">
+    ...
+  </CardContent>
+</Card>
+```
 
-Sticky header: replace with `<CardHeader>` inside a sticky `<div className="sticky top-0 bg-card/95 border-b border-border px-5 py-4 z-10">`.
-- Title `<CardTitle>` or plain `<div className="text-base font-semibold text-foreground tracking-wide pr-5">`
-- Close button: shadcn `<Button variant="ghost" size="icon" className="absolute top-2 right-2">` + lucide `<X size={16} />`
+The `overflow-y-auto` and `max-h-[calc(100%-32px)]` are on the `<Card>` itself (the outermost element), NOT on `CardContent`. This is required so the sticky header stays fixed while the body scrolls.
 
-Body: `<CardContent className="px-5 py-4 space-y-5">`.
-
-Section label (e.g. "WAS DU SIEHST"):
+Section label ("WAS DU SIEHST"):
 ```tsx
 <div className="text-xs text-muted-foreground uppercase tracking-widest mb-2">
 ```
@@ -113,79 +184,121 @@ Body paragraph:
 <p className="text-sm text-muted-foreground leading-relaxed">
 ```
 
-Highlighted inline text (station names, ring count):
+Highlighted inline text:
 ```tsx
 <span className="text-foreground font-semibold">
 ```
 
+× close button arrow color: lucide `<X>` inherits `text-muted-foreground` from `Button variant="ghost"`.
+
 ### `SearchBar.tsx`
-
-Input: replace raw `<input>` with shadcn `<Input>` — gets border, focus ring, background from shadcn automatically.
-- `className="w-full"` (Input is full-width by default)
-- Placeholder text color handled by CSS variables
-
-Clear button: `<Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6">` + lucide `<X size={12} />`
 
 Wrapper div: `className="relative"`
 
+Input: replace raw `<input>` with shadcn `<Input className="w-full pr-8" placeholder="Station suchen…" />`
+
+Clear button (appears when `inputValue` non-empty):
+```tsx
+<Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6" onClick={...}>
+  <X size={12} />
+</Button>
+```
+
 "Meinst du?" suggestion container: `className="mt-2 space-y-1"`
 
-Each suggestion: `<Button variant="ghost" className="w-full justify-start text-sm text-muted-foreground h-auto py-1 px-2">`
-- Prefix "Meinst du: " in `text-muted-foreground`, station name in `text-foreground font-medium`
+Each suggestion:
+```tsx
+<Button variant="ghost" className="w-full justify-start text-sm h-auto py-1 px-2">
+  <span className="text-muted-foreground">Meinst du: </span>
+  <span className="text-foreground font-medium ml-1">{station.name}</span>
+</Button>
+```
+
+All search/fuzzy logic (Levenshtein, guarded useEffect, phase 1/2 search) is unchanged.
 
 ### `Sidebar.tsx`
 
-Remove all inline styles. Replace with Tailwind:
 ```tsx
 <div className="w-[220px] shrink-0 h-full bg-card border-l border-border/10 p-4 flex flex-col overflow-y-auto">
+  <SearchBar ... />
+  <Separator className="my-4" />
+  <div className="text-[10px] text-muted-foreground uppercase tracking-widest mb-2.5">
+    SERVICE RINGS (inner → outer)
+  </div>
+  <Legend ... />
+</div>
 ```
-
-Label above legend ("SERVICE RINGS (inner → outer)"):
-```tsx
-<div className="text-[10px] text-muted-foreground uppercase tracking-widest mb-2.5">
-```
-
-Between SearchBar and legend label: shadcn `<Separator className="my-4" />`
 
 ### `Tooltip.tsx`
 
-The tooltip is a mouse-tracking floating element (not a Radix Tooltip). Replace inline styles with Tailwind:
+The tooltip is a mouse-tracking floating element rendered via `createPortal` to `document.body`. It is NOT replaced with the Radix `Tooltip` primitive.
+
+Position stays as inline style (dynamic values). Classes replace styling:
 ```tsx
 <div
   className="fixed z-50 pointer-events-none bg-popover border border-border rounded-md shadow-lg px-3 py-2 text-sm text-popover-foreground max-w-[220px]"
-  style={{ left: x + offset, top: y + offset }}  // keep position as inline style
+  style={{ left: mouseX + offset, top: mouseY + offset }}
 >
 ```
+
+**Note:** `z-50` (z-index: 50) replaces the previous `zIndex: 1000`. This is intentional — InfoPanel is `z-10`, so z-50 is sufficient for the portal tooltip to render above all chrome.
+
 Station name: `className="font-semibold text-foreground mb-1"`
-Service tags: `className="text-xs text-muted-foreground"`
+Service list: `className="text-xs text-muted-foreground"`
 
 ### `Legend.tsx`
 
-Container: `className="flex flex-col gap-1.5"` (replaces inline flex column styles).
+**Legend has complex state-driven opacity and color logic that CANNOT use static Tailwind pseudo-classes.** The `containerOpacity`, `labelColor`, and dot opacity are all driven by React state (`hoveredRingIndex`, `isStationHover`). These values stay as inline styles.
 
-Each legend item (hover target):
+Only structural/layout properties move to Tailwind:
+
+Outer container:
 ```tsx
 <div
-  className="flex items-center gap-2 cursor-pointer py-0.5"
-  onMouseEnter={...}
-  onMouseLeave={...}
+  className="flex flex-col gap-1 transition-opacity duration-150"
+  style={{ opacity: containerOpacity }}  // state-driven, stays inline
 >
 ```
-Color swatch (small circle/dot): `className="w-2 h-2 rounded-full shrink-0"` with `style={{ background: svc.color }}` (data color — keep as inline).
-Label text: `className="text-xs text-muted-foreground"` — opacity animation kept via inline style or Tailwind `opacity-50 hover:opacity-100 transition-opacity`.
 
-`containerOpacity` fade (0.5 → 1.0 on hover): keep as Tailwind `transition-opacity duration-150` with dynamic `opacity-50` / `opacity-100` class.
+Inner items wrapper:
+```tsx
+<div className="flex flex-col gap-2">
+```
+
+Each item row:
+```tsx
+<div className="flex items-center gap-1.5 cursor-pointer" onMouseEnter={...} onMouseLeave={...}>
+```
+
+Color dot:
+```tsx
+<div
+  className="w-2.5 h-2.5 rounded-full shrink-0 transition-opacity duration-150"
+  style={{ background: svc.color, opacity: isRingHover && !isHovered ? 0.4 : 1 }}  // stays inline
+/>
+```
+
+Label:
+```tsx
+<span
+  className="text-xs select-none transition-colors duration-150"
+  style={{ color: labelColor }}  // state-driven, stays inline
+>
+  {svc.label}
+</span>
+```
 
 ---
 
 ## What Does NOT Change
 
-- `ServiceRings.tsx` — all SVG, no inline styles on non-SVG elements
-- `StationLabels.tsx` — all SVG
+- `ServiceRings.tsx` — SVG only
+- `StationLabels.tsx` — SVG only
 - `RadialViz.tsx` — SVG wrapper
-- `CenterLabel.tsx` — SVG
-- `GroupMarkers.tsx` — SVG
-- Arc colors in `src/lib/colors.ts` — data visualization palette, untouched
+- `CenterLabel.tsx` — SVG only
+- `GroupMarkers.tsx` — SVG only
+- `ConnectorLines.tsx` — SVG only
+- Arc colors in `src/lib/colors.ts` — data viz palette, untouched
 - All hover logic, opacity priority ladder, search logic, connector lines
 - `src/lib/levenshtein.ts` — untouched
 - `src/lib/layout.ts` — untouched
@@ -197,27 +310,29 @@ Label text: `className="text-xs text-muted-foreground"` — opacity animation ke
 | File | Change |
 |---|---|
 | `vite.config.ts` | Add `@tailwindcss/vite` plugin |
-| `src/index.css` | Add `@import "tailwindcss"` + shadcn CSS variables |
-| `src/main.tsx` | Add `dark` class to `<html>` |
+| `src/App.css` → `src/index.css` | Rename; strip hardcoded colors; add `@import "tailwindcss"` + shadcn CSS variables |
+| `src/main.tsx` | Update CSS import path; add `dark` class to `<html>` |
+| `package.json` | Add `lightningcss` to `pnpm.onlyBuiltDependencies` |
 | `src/lib/utils.ts` | New — shadcn `cn()` helper |
 | `src/components/ui/` | New — `button.tsx`, `card.tsx`, `input.tsx`, `separator.tsx` |
-| `src/App.tsx` | Tailwind root layout, shadcn `Button` for ℹ |
-| `src/components/InfoPanel.tsx` | shadcn `Card` shell, Tailwind body |
+| `src/App.tsx` | Tailwind classes, shadcn `Button` for ℹ |
+| `src/components/InfoPanel.tsx` | shadcn `Card` with sticky header in correct tree position |
 | `src/components/SearchBar.tsx` | shadcn `Input` + `Button` |
 | `src/components/Sidebar.tsx` | Tailwind layout + shadcn `Separator` |
-| `src/components/Tooltip.tsx` | Tailwind classes, position stays inline |
-| `src/components/Legend.tsx` | Tailwind classes, swatch color stays inline |
+| `src/components/Tooltip.tsx` | Tailwind classes, position inline |
+| `src/components/Legend.tsx` | Tailwind layout classes; state-driven colors/opacity stay inline |
 
 ---
 
 ## Success Criteria
 
-1. App renders with shadcn dark zinc theme — no white flash, no unstyled flash
-2. `InfoPanel` uses `Card` with sticky header and scrollable body — behavior identical to before
-3. `SearchBar` input has shadcn focus ring and styling; search + fuzzy suggestion logic unchanged
-4. Sidebar `Separator` renders correctly between search and legend
-5. ℹ button uses shadcn `Button` with lucide icon
-6. Tooltip floats correctly at mouse position, styled with shadcn tokens
-7. Legend hover opacity transition works
-8. All existing tests pass (search logic, layout, colors — no component tests need updating)
-9. `pnpm build` produces no TypeScript errors
+1. App renders with shadcn dark zinc theme — no white flash, no blue `#0f1b2d` background
+2. Page does not scroll — `overflow: hidden` on `html/body/#root` preserved
+3. `InfoPanel` sticky header stays fixed while body scrolls
+4. `SearchBar` input has shadcn focus ring; search + fuzzy suggestion logic unchanged
+5. Sidebar `Separator` renders between search and legend
+6. ℹ button uses shadcn `Button` with lucide `<Info>` icon
+7. Tooltip floats at mouse position, styled with shadcn tokens, above InfoPanel
+8. Legend hover opacity/color transitions work (state-driven inline styles)
+9. All existing tests pass (`pnpm test`)
+10. `pnpm build` produces no TypeScript errors
