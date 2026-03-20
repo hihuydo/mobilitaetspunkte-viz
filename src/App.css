@@ -19,6 +19,6 @@ svg text {
 }
 
 /* Smooth arc transitions */
-svg path {
+.arc-path {
   transition: opacity 150ms ease-out;
 }

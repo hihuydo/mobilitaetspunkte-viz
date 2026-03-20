@@ -36,6 +36,9 @@ export default function App() {
     setMousePos({ x: e.clientX, y: e.clientY })
   }, [])
 
+  const handleRingLeave = useCallback(() => setHoveredRingIndex(null), [])
+  const handleStationLeave = useCallback(() => setHoveredStationIndex(null), [])
+
   // Find hovered station geometry for tooltip
   const hoveredStation: StationGeometry | null =
     hoveredStationIndex !== null && layout
@@ -62,7 +65,7 @@ export default function App() {
     >
       {/* SVG container — flex:1, takes all space above legend */}
       <div ref={svgContainerRef} style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-        {layout && svgDimensions.width > 0 ? (
+        {layout && svgDimensions.width > 0 && svgDimensions.height > 0 ? (
           <RadialViz
             layout={layout}
             groups={groups}
@@ -71,7 +74,7 @@ export default function App() {
             hoveredRingIndex={hoveredRingIndex}
             hoveredStationIndex={hoveredStationIndex}
             onStationEnter={setHoveredStationIndex}
-            onStationLeave={() => setHoveredStationIndex(null)}
+            onStationLeave={handleStationLeave}
           />
         ) : (
           <div
@@ -96,7 +99,7 @@ export default function App() {
         hoveredRingIndex={hoveredRingIndex}
         isStationHover={hoveredStationIndex !== null}
         onRingEnter={setHoveredRingIndex}
-        onRingLeave={() => setHoveredRingIndex(null)}
+        onRingLeave={handleRingLeave}
       />
 
       {/* Tooltip */}

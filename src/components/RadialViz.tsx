@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import type { StationGroup } from '../lib/parseData'
 import { SERVICE_DEFINITIONS } from '../lib/colors'
 import type { LayoutResult } from '../lib/layout'
@@ -28,18 +28,14 @@ export function RadialViz({
   onStationEnter,
   onStationLeave,
 }: RadialVizProps) {
-  const [hoveredStationIndexInternal, setHoveredStationIndexInternal] = useState<number | null>(null)
-
-  // Use controlled value if provided, otherwise fall back to internal state
-  const hoveredStationIndex = hoveredStationIndexProp !== undefined ? hoveredStationIndexProp : hoveredStationIndexInternal
+  // Fully controlled: parent always passes hoveredStationIndex
+  const hoveredStationIndex = hoveredStationIndexProp ?? null
 
   const handleStationEnter = useCallback((index: number) => {
-    setHoveredStationIndexInternal(index)
     onStationEnter?.(index)
   }, [onStationEnter])
 
   const handleStationLeave = useCallback(() => {
-    setHoveredStationIndexInternal(null)
     onStationLeave?.()
   }, [onStationLeave])
 

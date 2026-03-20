@@ -76,12 +76,12 @@ export function ServiceRings({
               return (
                 <path
                   key={`${station.stationIndex}-${ringIndex}`}
+                  className="arc-path"
                   d={path}
                   fill={fill}
                   stroke={stroke}
                   strokeWidth={0.5}
                   opacity={opacity}
-                  style={{ transition: 'opacity 150ms ease-out' }}
                   onMouseEnter={() => onStationEnter(station.stationIndex)}
                   onMouseLeave={onStationLeave}
                   cursor="crosshair"
