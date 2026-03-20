@@ -2,6 +2,7 @@
 import type { StationGeometry } from '../lib/layout'
 import { SearchBar } from './SearchBar'
 import { Legend } from './Legend'
+import { Separator } from '@/components/ui/separator'
 
 interface SidebarProps {
   stations: StationGeometry[]
@@ -23,47 +24,12 @@ export function Sidebar({
   onRingLeave,
 }: SidebarProps) {
   return (
-    <div
-      style={{
-        width: 220,
-        flexShrink: 0,
-        height: '100%',
-        background: '#0a1220',
-        borderLeft: '1px solid rgba(255,255,255,0.06)',
-        padding: 16,
-        display: 'flex',
-        flexDirection: 'column',
-        overflowY: 'auto',
-        boxSizing: 'border-box',
-        fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-      }}
-    >
-      {/* Search */}
+    <div className="w-[220px] shrink-0 h-full bg-card border-l border-border/10 p-4 flex flex-col overflow-y-auto">
       <SearchBar stations={stations} searchQuery={searchQuery} onSearch={onSearch} />
-
-      {/* Divider */}
-      <div
-        style={{
-          borderTop: '1px solid rgba(255,255,255,0.08)',
-          margin: '16px 0',
-          flexShrink: 0,
-        }}
-      />
-
-      {/* Service rings label */}
-      <div
-        style={{
-          fontSize: 10,
-          color: '#4a7fa8',
-          letterSpacing: 1,
-          marginBottom: 10,
-          userSelect: 'none',
-        }}
-      >
+      <Separator className="my-4" />
+      <div className="text-[10px] text-muted-foreground uppercase tracking-widest mb-2.5 select-none">
         SERVICE RINGS (inner → outer)
       </div>
-
-      {/* Legend */}
       <Legend
         hoveredRingIndex={hoveredRingIndex}
         isStationHover={isStationHover}
