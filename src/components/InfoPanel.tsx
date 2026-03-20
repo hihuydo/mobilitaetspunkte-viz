@@ -80,7 +80,7 @@ export const InfoPanel = memo(function InfoPanel({ onClose }: InfoPanelProps) {
         </div>
         <div
           style={{
-            fontSize: 16,
+            fontSize: 14,
             color: '#6a94b0',
             lineHeight: 1.6,
             marginBottom: 20,
@@ -114,7 +114,7 @@ export const InfoPanel = memo(function InfoPanel({ onClose }: InfoPanelProps) {
         >
           Wie erkunden
         </div>
-        <div style={{ fontSize: 16, color: '#6a94b0', lineHeight: 1.6 }}>
+        <div style={{ fontSize: 14, color: '#6a94b0', lineHeight: 1.6 }}>
           <span style={{ color: '#8ab4d4' }}>↗ Strich hovern</span> — Details zur Station:
           Adresse, alle vorhandenen Dienste, Anzahl Carsharing-Plätze.
           <br />

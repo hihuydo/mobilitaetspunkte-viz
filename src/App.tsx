@@ -33,7 +33,7 @@ export default function App() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
 
   // Info panel state
-  const [infoPanelVisible, setInfoPanelVisible] = useState(true)
+  const [infoPanelVisible, setInfoPanelVisible] = useState(false)
   const handleInfoPanelClose = useCallback(() => setInfoPanelVisible(false), [])
   const handleInfoPanelOpen = useCallback(() => setInfoPanelVisible(true), [])
 
@@ -118,13 +118,13 @@ export default function App() {
               position: 'absolute',
               top: 16,
               left: 16,
-              width: 28,
-              height: 28,
-              background: 'rgba(10, 18, 32, 0.94)',
-              border: '1px solid #1a2a45',
+              width: 36,
+              height: 36,
+              background: 'rgba(10, 18, 32, 0.9)',
+              border: '1px solid #2a4a6a',
               borderRadius: '50%',
-              color: '#4a7fa8',
-              fontSize: 13,
+              color: '#8ab4d4',
+              fontSize: 18,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
