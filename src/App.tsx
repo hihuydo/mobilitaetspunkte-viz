@@ -5,6 +5,8 @@ import { RadialViz } from './components/RadialViz'
 import { Sidebar } from './components/Sidebar'
 import { Tooltip } from './components/Tooltip'
 import { InfoPanel } from './components/InfoPanel'
+import { Button } from '@/components/ui/button'
+import { Info } from 'lucide-react'
 import type { StationGeometry } from './lib/layout'
 
 export default function App() {
@@ -67,17 +69,9 @@ export default function App() {
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        height: '100vh',
-        background: '#0f1b2d',
-      }}
-      onMouseMove={handleMouseMove}
-    >
+    <div className="flex flex-row h-screen bg-background" onMouseMove={handleMouseMove}>
       {/* SVG container — flex:1, full height */}
-      <div ref={svgContainerRef} style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+      <div ref={svgContainerRef} className="flex-1 relative overflow-hidden">
         {layout && svgDimensions.width > 0 && svgDimensions.height > 0 ? (
           <RadialViz
             layout={layout}
@@ -91,18 +85,7 @@ export default function App() {
             onStationLeave={handleStationLeave}
           />
         ) : (
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#4a7fa8',
-              fontSize: 14,
-              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-            }}
-          >
+          <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
             Lade Daten…
           </div>
         )}
@@ -111,29 +94,15 @@ export default function App() {
         {infoPanelVisible ? (
           <InfoPanel onClose={handleInfoPanelClose} />
         ) : (
-          <button
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleInfoPanelOpen}
             title="Legende anzeigen"
-            style={{
-              position: 'absolute',
-              top: 16,
-              left: 16,
-              width: 36,
-              height: 36,
-              background: 'rgba(10, 18, 32, 0.9)',
-              border: '1px solid #2a4a6a',
-              borderRadius: '50%',
-              color: '#8ab4d4',
-              fontSize: 18,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 10,
-            }}
+            className="absolute top-4 left-4 z-10"
           >
-            ℹ
-          </button>
+            <Info size={18} />
+          </Button>
         )}
       </div>
 
