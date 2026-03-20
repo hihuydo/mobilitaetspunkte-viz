@@ -132,13 +132,7 @@
   }
 }
 
-/* Project-specific: resets and visualization globals */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
+/* Project-specific: visualization globals */
 html, body, #root {
   height: 100%;
   width: 100%;
