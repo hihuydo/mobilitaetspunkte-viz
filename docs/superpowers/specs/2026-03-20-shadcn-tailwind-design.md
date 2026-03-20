@@ -129,6 +129,38 @@ This generates:
 ```
 SVG `<text>` elements in this project set `fontFamily` via SVG attributes — they are unaffected.
 
+### Custom design tokens
+
+No hardcoded color, font-size, or spacing values anywhere in the UI chrome. All values must use:
+- **Tailwind utility classes** for static styling (font sizes, spacing, colors that map to shadcn tokens)
+- **CSS custom properties** for state-driven inline styles where Tailwind classes cannot be used
+
+The Legend component has three state-driven label colors that don't map to shadcn's default token set. Define them as CSS custom properties in `src/index.css` inside `@layer base`:
+
+```css
+@layer base {
+  :root {
+    /* Legend label colors — used for state-driven inline styles in Legend.tsx */
+    --color-legend-label: 210 55% 70%;          /* default: medium blue */
+    --color-legend-label-active: 210 30% 88%;   /* hovered: light blue-grey */
+  }
+}
+```
+
+These are defined in HSL component form (no `hsl()` wrapper) so they compose with opacity using `hsl(var(--color-legend-label) / 0.4)`.
+
+In `tailwind.config` (or via CSS `@theme` in v4), extend the color palette to expose these as Tailwind classes too:
+```css
+@theme {
+  --color-legend-label: hsl(210 55% 70%);
+  --color-legend-label-active: hsl(210 30% 88%);
+}
+```
+
+This enables `text-legend-label` and `text-legend-label-active` as Tailwind classes for static uses.
+
+**Exception — visualization data colors:** `svc.color` values on Legend dots (`style={{ background: svc.color }}`) are data-encoding colors from `src/lib/colors.ts`. These represent transit service types and are intentionally not design tokens — do not change them.
+
 ### lucide-react
 
 `pnpm add lucide-react` (step 6 above). Do not rely on shadcn to install it implicitly.
@@ -277,13 +309,25 @@ Service list: `className="text-xs text-muted-foreground"`
 
 **Legend has complex state-driven opacity and color logic that CANNOT use static Tailwind pseudo-classes.** The `containerOpacity`, `labelColor`, and dot opacity are all driven by React state (`hoveredRingIndex`, `isStationHover`). These values stay as inline styles.
 
-Only structural/layout properties move to Tailwind:
+State-driven opacity values stay as inline styles; state-driven colors reference CSS custom properties (no hex literals). Layout moves to Tailwind:
+
+```tsx
+// Derive containerOpacity from state — numeric opacity is acceptable as a literal (semantic: 50% / 100%)
+const containerOpacity = isRingHover || isStationHover ? 1 : 0.5
+
+// Derive labelColor using CSS custom properties — no hex literals
+const labelColor = isHovered
+  ? 'hsl(var(--color-legend-label-active))'
+  : isRingHover
+  ? 'hsl(var(--color-legend-label) / 0.4)'
+  : 'hsl(var(--color-legend-label))'
+```
 
 Outer container:
 ```tsx
 <div
   className="flex flex-col gap-1 transition-opacity duration-150"
-  style={{ opacity: containerOpacity }}  // state-driven, stays inline
+  style={{ opacity: containerOpacity }}
 >
 ```
 
@@ -297,19 +341,19 @@ Each item row:
 <div className="flex items-center gap-1.5 cursor-pointer" onMouseEnter={...} onMouseLeave={...}>
 ```
 
-Color dot:
+Color dot — `svc.color` is a data-encoding color from `colors.ts`, not a design token; keep as-is:
 ```tsx
 <div
   className="w-2.5 h-2.5 rounded-full shrink-0 transition-opacity duration-150"
-  style={{ background: svc.color, opacity: isRingHover && !isHovered ? 0.4 : 1 }}  // stays inline
+  style={{ background: svc.color, opacity: isRingHover && !isHovered ? 0.4 : 1 }}
 />
 ```
 
-Label:
+Label — `labelColor` now references CSS variables, no hex literals:
 ```tsx
 <span
   className="text-xs select-none transition-colors duration-150"
-  style={{ color: labelColor }}  // state-driven, stays inline
+  style={{ color: labelColor }}
 >
   {svc.label}
 </span>
@@ -343,7 +387,7 @@ Label:
 | File | Change |
 |---|---|
 | `vite.config.ts` | Add `@tailwindcss/vite` plugin |
-| `src/App.css` → `src/index.css` | Rename; strip hardcoded colors; add `@import "tailwindcss"` + shadcn CSS variables |
+| `src/App.css` → `src/index.css` | Rename; strip hardcoded colors; add `@import "tailwindcss"` + shadcn CSS variables + custom `--color-legend-label*` tokens + `@theme` block |
 | `src/main.tsx` | Update CSS import path; add `dark` class to `<html>` |
 | `package.json` | Add `lightningcss` to `pnpm.onlyBuiltDependencies` |
 | `src/lib/utils.ts` | New — shadcn `cn()` helper |
@@ -369,3 +413,4 @@ Label:
 8. Legend hover opacity/color transitions work (state-driven inline styles)
 9. All existing tests pass (`pnpm test`)
 10. `pnpm build` produces no TypeScript errors
+11. No hardcoded color hex/rgba values in any UI chrome component — only Tailwind tokens or `hsl(var(--...))` CSS variable references. Exception: `svc.color` dots in Legend (data-encoding colors from `colors.ts`)
