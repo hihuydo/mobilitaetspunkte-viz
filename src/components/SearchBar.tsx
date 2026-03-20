@@ -2,6 +2,9 @@
 import { useState, useEffect } from 'react'
 import { levenshtein } from '../lib/levenshtein'
 import type { StationGeometry } from '../lib/layout'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { X } from 'lucide-react'
 
 interface SearchBarProps {
   stations: StationGeometry[]
@@ -18,14 +21,12 @@ function stationScore(query: string, name: string): number {
 }
 
 export function SearchBar({ stations, searchQuery, onSearch }: SearchBarProps) {
-  // All state declared first — ensures setters are in scope for all handlers below
   const [inputValue, setInputValue] = useState('')
   const [suggestions, setSuggestions] = useState<StationGeometry[]>([])
 
   // Sync input when searchQuery changes externally (suggestion click path).
   // Guard prevents echo: when user types, onSearch → App sets searchQuery to the same
   // string → this effect fires but searchQuery === inputValue so nothing happens.
-  // Only the suggestion-click path changes searchQuery to a different value.
   useEffect(() => {
     if (searchQuery !== inputValue) {
       setInputValue(searchQuery)
@@ -52,14 +53,12 @@ export function SearchBar({ stations, searchQuery, onSearch }: SearchBarProps) {
       setSuggestions([])
       return
     }
-    // Phase 1: substring match
     const q = query.toLowerCase()
     const matches = stations.filter((s) => s.name.toLowerCase().includes(q))
     if (matches.length > 0) {
       onSearch(query, new Set(matches.map((s) => s.stationIndex)))
       return
     }
-    // Phase 2: fuzzy Levenshtein fallback (query.length >= 3 only)
     if (query.length < 3) {
       onSearch(query, new Set())
       return
@@ -71,7 +70,7 @@ export function SearchBar({ stations, searchQuery, onSearch }: SearchBarProps) {
       .map((x) => x.s)
       .sort((a, b) => a.name.localeCompare(b.name, 'de'))
       .slice(0, 2)
-    onSearch(query, new Set()) // no highlight yet — suggestion click triggers highlight
+    onSearch(query, new Set())
     setSuggestions(topMatches)
   }
 
@@ -92,78 +91,41 @@ export function SearchBar({ stations, searchQuery, onSearch }: SearchBarProps) {
   }
 
   return (
-    <div style={{ width: '100%' }}>
-      {/* Input row */}
-      <div style={{ position: 'relative', width: '100%' }}>
-        <input
+    <div className="w-full">
+      <div className="relative">
+        <Input
           type="text"
           value={inputValue}
           onChange={(e) => handleChange(e.target.value)}
           placeholder="Station suchen…"
-          style={{
-            width: '100%',
-            boxSizing: 'border-box',
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            borderRadius: 0,
-            color: '#c9d8e8',
-            fontSize: 13,
-            padding: '7px 28px 7px 10px',
-            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-            outline: 'none',
-          }}
-          onFocus={(e) => { e.target.style.borderColor = 'rgba(255,255,255,0.25)' }}
-          onBlur={(e) => { e.target.style.borderColor = 'rgba(255,255,255,0.12)' }}
+          className="w-full pr-8"
         />
         {inputValue && (
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleClear}
-            style={{
-              position: 'absolute',
-              right: 8,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              background: 'none',
-              border: 'none',
-              color: 'rgba(138,180,212,0.6)',
-              cursor: 'pointer',
-              fontSize: 14,
-              padding: 0,
-              lineHeight: 1,
-            }}
             aria-label="Suche löschen"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
           >
-            ×
-          </button>
+            <X size={12} />
+          </Button>
         )}
       </div>
 
-      {/* Fuzzy suggestions */}
       {suggestions.length > 0 && (
-        <div
-          style={{
-            marginTop: 6,
-            fontSize: 11,
-            color: 'rgba(138,180,212,0.7)',
-            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-          }}
-        >
+        <div className="mt-2 space-y-1">
           {suggestions.map((station) => (
-            <div key={station.stationIndex} style={{ marginBottom: 3 }}>
-              Meinst du:{' '}
-              <span
-                onClick={() => handleSuggestionClick(station)}
-                style={{
-                  color: '#c9d8e8',
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                  textDecorationColor: 'rgba(201,216,232,0.4)',
-                }}
-              >
-                {station.name}
-              </span>
-              ?
-            </div>
+            <Button
+              key={station.stationIndex}
+              variant="ghost"
+              className="w-full justify-start text-sm h-auto py-1 px-2"
+              onClick={() => handleSuggestionClick(station)}
+            >
+              <span className="text-muted-foreground">Meinst du: </span>
+              <span className="text-foreground font-medium ml-1">{station.name}</span>
+              <span className="text-muted-foreground">?</span>
+            </Button>
           ))}
         </div>
       )}
