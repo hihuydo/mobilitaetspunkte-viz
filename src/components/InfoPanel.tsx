@@ -44,7 +44,7 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
       {/* Title */}
       <div
         style={{
-          fontSize: 10,
+          fontSize: 12,
           fontWeight: 600,
           color: '#c9d8e8',
           letterSpacing: '0.5px',
@@ -58,7 +58,7 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
       {/* Section 1: Was du siehst */}
       <div
         style={{
-          fontSize: 8.5,
+          fontSize: 9,
           color: '#4a7fa8',
           letterSpacing: '1px',
           textTransform: 'uppercase',
@@ -69,7 +69,7 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
       </div>
       <div
         style={{
-          fontSize: 8.5,
+          fontSize: 11,
           color: '#6a94b0',
           lineHeight: 1.55,
           marginBottom: 10,
@@ -94,7 +94,7 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
       {/* Section 2: Wie erkunden */}
       <div
         style={{
-          fontSize: 8.5,
+          fontSize: 9,
           color: '#4a7fa8',
           letterSpacing: '1px',
           textTransform: 'uppercase',
@@ -103,7 +103,7 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
       >
         Wie erkunden
       </div>
-      <div style={{ fontSize: 8.5, color: '#6a94b0', lineHeight: 1.6 }}>
+      <div style={{ fontSize: 11, color: '#6a94b0', lineHeight: 1.6 }}>
         <span style={{ color: '#8ab4d4' }}>↗ Strich hovern</span> — Details zur Station:
         Adresse, alle vorhandenen Dienste, Anzahl Carsharing-Plätze.
         <br />

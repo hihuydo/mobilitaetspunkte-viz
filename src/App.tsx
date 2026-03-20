@@ -41,6 +41,7 @@ export default function App() {
   const handleRingLeave = useCallback(() => setHoveredRingIndex(null), [])
   const handleStationLeave = useCallback(() => setHoveredStationIndex(null), [])
   const handleInfoPanelClose = useCallback(() => setInfoPanelVisible(false), [])
+  const handleInfoPanelOpen = useCallback(() => setInfoPanelVisible(true), [])
 
   // Find hovered station geometry for tooltip
   const hoveredStation: StationGeometry | null =
@@ -95,8 +96,32 @@ export default function App() {
             Lade Daten…
           </div>
         )}
-        {infoPanelVisible && (
+        {infoPanelVisible ? (
           <InfoPanel onClose={handleInfoPanelClose} />
+        ) : (
+          <button
+            onClick={handleInfoPanelOpen}
+            title="Legende anzeigen"
+            style={{
+              position: 'absolute',
+              top: 16,
+              left: 16,
+              width: 28,
+              height: 28,
+              background: 'rgba(10, 18, 32, 0.94)',
+              border: '1px solid #1a2a45',
+              borderRadius: '50%',
+              color: '#4a7fa8',
+              fontSize: 13,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10,
+            }}
+          >
+            ℹ
+          </button>
         )}
       </div>
 
