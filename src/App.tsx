@@ -40,6 +40,7 @@ export default function App() {
 
   const handleRingLeave = useCallback(() => setHoveredRingIndex(null), [])
   const handleStationLeave = useCallback(() => setHoveredStationIndex(null), [])
+  const handleInfoPanelClose = useCallback(() => setInfoPanelVisible(false), [])
 
   // Find hovered station geometry for tooltip
   const hoveredStation: StationGeometry | null =
@@ -95,7 +96,7 @@ export default function App() {
           </div>
         )}
         {infoPanelVisible && (
-          <InfoPanel onClose={() => setInfoPanelVisible(false)} />
+          <InfoPanel onClose={handleInfoPanelClose} />
         )}
       </div>
 
