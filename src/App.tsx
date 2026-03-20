@@ -81,6 +81,7 @@ export default function App() {
             hoveredRingIndex={hoveredRingIndex}
             hoveredStationIndex={hoveredStationIndex}
             activeStationIndices={activeStationIndices}
+            isInteracting={hoveredStationIndex !== null || hoveredRingIndex !== null}
             onStationEnter={setHoveredStationIndex}
             onStationLeave={handleStationLeave}
           />

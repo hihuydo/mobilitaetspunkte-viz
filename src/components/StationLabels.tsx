@@ -56,27 +56,35 @@ export function StationLabels({
           ? `rotate(${angleDeg}) translate(${R}, 0) rotate(180)`
           : `rotate(${angleDeg}) translate(${R}, 0)`
 
+        // midAngle starts at -π/2 (top) and sweeps clockwise to ~3π/2; +350ms after arcs
+        const entryDelay = ((station.midAngle + Math.PI / 2) / (2 * Math.PI)) * 600 + 350
+
         return (
-          <text
+          <g
             key={station.stationIndex}
-            transform={transform}
-            textAnchor={station.labelAnchor}
-            dominantBaseline="middle"
-            fontSize="clamp(5.5px, 0.8vw, 8px)"
-            fontWeight={300}
-            fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif"
-            fill={fill}
-            opacity={opacity}
-            style={{
-              transition: 'opacity 150ms ease-out, fill 150ms ease-out',
-              cursor: 'default',
-              userSelect: 'none',
-            }}
-            onMouseEnter={() => onStationEnter(station.stationIndex)}
-            onMouseLeave={onStationLeave}
+            className="station-entry"
+            style={{ animationDelay: `${entryDelay}ms` }}
           >
-            {station.name}
-          </text>
+            <text
+              transform={transform}
+              textAnchor={station.labelAnchor}
+              dominantBaseline="middle"
+              fontSize="clamp(5.5px, 0.8vw, 8px)"
+              fontWeight={300}
+              fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif"
+              fill={fill}
+              opacity={opacity}
+              style={{
+                transition: 'opacity 150ms ease-out, fill 150ms ease-out',
+                cursor: 'default',
+                userSelect: 'none',
+              }}
+              onMouseEnter={() => onStationEnter(station.stationIndex)}
+              onMouseLeave={onStationLeave}
+            >
+              {station.name}
+            </text>
+          </g>
         )
       })}
     </g>
