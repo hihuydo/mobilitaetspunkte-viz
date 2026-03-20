@@ -1,3 +1,4 @@
+// src/components/Tooltip.tsx
 import { createPortal } from 'react-dom'
 import { SERVICE_DEFINITIONS } from '../lib/colors'
 import type { StationGeometry } from '../lib/layout'
