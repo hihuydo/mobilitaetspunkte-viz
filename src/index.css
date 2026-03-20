@@ -125,6 +125,43 @@
   :root {
     --color-legend-label: 210 55% 70%;
     --color-legend-label-active: 210 30% 88%;
+
+    /* --- Visualization tokens ---
+       Single source of truth for all viz colors.
+       Used in SVG fill/stroke as var(--viz-*) and in colors.ts exports. */
+
+    /* Backgrounds & surfaces */
+    --viz-bg: #0f1b2d;
+    --viz-surface: #0a1220;
+    --viz-separator: #1a2a45;
+
+    /* Text */
+    --viz-text-primary: #c9d8e8;
+    --viz-text-muted: #4a7fa8;
+    --viz-text-dimmed: #6a94b0;
+
+    /* Interaction */
+    --viz-stroke-hover: rgba(255,255,255,0.5);
+
+    /* Service ring colors (inner → outer) */
+    --viz-service-s-bahn: #00A651;
+    --viz-service-u-bahn: #0072BC;
+    --viz-service-tram: #CC0000;
+    --viz-service-bus: #F7941D;
+    --viz-service-ods: #9B59B6;
+    --viz-service-carsharing: #E91E63;
+    --viz-service-bikesharing: #FFD600;
+    --viz-service-leihscooter: #00BCD4;
+    --viz-service-mietrad: #FF8A65;
+    --viz-service-bike-station: #80CBC4;
+    --viz-service-bike-pump: #B0BEC5;
+
+    /* Group colors */
+    --viz-group-s-bahn: #00A651;
+    --viz-group-u-bahn: #0072BC;
+    --viz-group-tram: #CC0000;
+    --viz-group-bus: #F7941D;
+    --viz-group-none: #4a7fa8;
   }
 
   body {
@@ -141,6 +178,7 @@ html, body, #root {
 
 svg text {
   -webkit-font-smoothing: antialiased;
+  font-family: inherit;
 }
 
 .arc-path {

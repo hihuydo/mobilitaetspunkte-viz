@@ -15,8 +15,8 @@ export function CenterLabel({ cx, cy, r, hoveredRingLabel }: CenterLabelProps) {
         cx={cx}
         cy={cy}
         r={r}
-        fill="#0a1220"
-        stroke="#1a2a45"
+        fill="var(--viz-surface)"
+        stroke="var(--viz-separator)"
         strokeWidth={1}
       />
 
@@ -32,9 +32,8 @@ export function CenterLabel({ cx, cy, r, hoveredRingLabel }: CenterLabelProps) {
           y={cy - 8}
           textAnchor="middle"
           fontSize={7}
-          fill="#4a7fa8"
+          fill="var(--viz-text-muted)"
           letterSpacing={1.5}
-          fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif"
         >
           MÜNCHEN
         </text>
@@ -43,9 +42,8 @@ export function CenterLabel({ cx, cy, r, hoveredRingLabel }: CenterLabelProps) {
           y={cy + 4}
           textAnchor="middle"
           fontSize={8.5}
-          fill="#c9d8e8"
+          fill="var(--viz-text-primary)"
           fontWeight={600}
-          fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif"
         >
           Mobilitäts-
         </text>
@@ -54,9 +52,8 @@ export function CenterLabel({ cx, cy, r, hoveredRingLabel }: CenterLabelProps) {
           y={cy + 15}
           textAnchor="middle"
           fontSize={8.5}
-          fill="#c9d8e8"
+          fill="var(--viz-text-primary)"
           fontWeight={600}
-          fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif"
         >
           punkte
         </text>
@@ -74,8 +71,7 @@ export function CenterLabel({ cx, cy, r, hoveredRingLabel }: CenterLabelProps) {
           y={cy + 4}
           textAnchor="middle"
           fontSize={9}
-          fill="#c9d8e8"
-          fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif"
+          fill="var(--viz-text-primary)"
         >
           {hoveredRingLabel ?? ''}
         </text>

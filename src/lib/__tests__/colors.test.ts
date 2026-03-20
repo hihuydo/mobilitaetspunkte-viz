@@ -9,44 +9,44 @@ describe('SERVICE_DEFINITIONS', () => {
   it('maps gaf_ts_vorhanden to Carsharing at ring index 5 (0-based)', () => {
     expect(SERVICE_DEFINITIONS[5].field).toBe('gaf_ts_vorhanden')
     expect(SERVICE_DEFINITIONS[5].label).toBe('Carsharing')
-    expect(SERVICE_DEFINITIONS[5].color).toBe('#E91E63')
+    expect(SERVICE_DEFINITIONS[5].color).toBe('var(--viz-service-carsharing)')
   })
 
   it('first ring is S-Bahn', () => {
     expect(SERVICE_DEFINITIONS[0].field).toBe('s_bahn_vorhanden')
-    expect(SERVICE_DEFINITIONS[0].color).toBe('#00A651')
+    expect(SERVICE_DEFINITIONS[0].color).toBe('var(--viz-service-s-bahn)')
   })
 
   it('last ring (index 10) is Bike Pump', () => {
     expect(SERVICE_DEFINITIONS[10].field).toBe('radpumpe_vorhanden')
-    expect(SERVICE_DEFINITIONS[10].color).toBe('#B0BEC5')
+    expect(SERVICE_DEFINITIONS[10].color).toBe('var(--viz-service-bike-pump)')
   })
 
-  it('each entry has field, label, color', () => {
+  it('each entry has field, label, color as CSS custom property', () => {
     SERVICE_DEFINITIONS.forEach((def) => {
       expect(typeof def.field).toBe('string')
       expect(typeof def.label).toBe('string')
-      expect(def.color).toMatch(/^#[0-9A-Fa-f]{6}$/)
+      expect(def.color).toMatch(/^var\(--viz-service-/)
     })
   })
 })
 
 describe('GROUP_COLORS', () => {
-  it('has color for all 5 groups', () => {
-    expect(GROUP_COLORS['s-bahn']).toBe('#00A651')
-    expect(GROUP_COLORS['u-bahn']).toBe('#0072BC')
-    expect(GROUP_COLORS['tram']).toBe('#CC0000')
-    expect(GROUP_COLORS['bus']).toBe('#F7941D')
-    expect(GROUP_COLORS['none']).toBe('#4a7fa8')
+  it('has CSS custom property for all 5 groups', () => {
+    expect(GROUP_COLORS['s-bahn']).toBe('var(--viz-group-s-bahn)')
+    expect(GROUP_COLORS['u-bahn']).toBe('var(--viz-group-u-bahn)')
+    expect(GROUP_COLORS['tram']).toBe('var(--viz-group-tram)')
+    expect(GROUP_COLORS['bus']).toBe('var(--viz-group-bus)')
+    expect(GROUP_COLORS['none']).toBe('var(--viz-group-none)')
   })
 })
 
 describe('constants', () => {
-  it('ABSENT_COLOR is the dark background filler', () => {
-    expect(ABSENT_COLOR).toBe('#0a1220')
+  it('ABSENT_COLOR references viz-surface token', () => {
+    expect(ABSENT_COLOR).toBe('var(--viz-surface)')
   })
 
-  it('BG_COLOR is the page background', () => {
-    expect(BG_COLOR).toBe('#0f1b2d')
+  it('BG_COLOR references viz-bg token', () => {
+    expect(BG_COLOR).toBe('var(--viz-bg)')
   })
 })

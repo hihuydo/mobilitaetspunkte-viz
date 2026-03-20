@@ -34,17 +34,17 @@ export function StationLabels({
         let fill: string
         if (hoveredStationIndex !== null) {
           opacity = isHovered ? 1 : 0.2
-          fill = isHovered ? '#c9d8e8' : '#6a94b0'
+          fill = isHovered ? 'var(--viz-text-primary)' : 'var(--viz-text-dimmed)'
         } else if (isRingHover) {
           opacity = 0.3
-          fill = '#6a94b0'
+          fill = 'var(--viz-text-dimmed)'
         } else if (isSearchActive) {
           const isMatch = activeStationIndices.has(station.stationIndex)
           opacity = isMatch ? 1 : 0.08
-          fill = isMatch ? '#c9d8e8' : '#6a94b0'
+          fill = isMatch ? 'var(--viz-text-primary)' : 'var(--viz-text-dimmed)'
         } else {
           opacity = 1
-          fill = '#6a94b0'
+          fill = 'var(--viz-text-dimmed)'
         }
 
         const cos = Math.cos(station.midAngle)
@@ -88,7 +88,6 @@ export function StationLabels({
               dominantBaseline="middle"
               fontSize="clamp(5.5px, 0.8vw, 8px)"
               fontWeight={300}
-              fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif"
               fill={fill}
               opacity={opacity}
               style={{

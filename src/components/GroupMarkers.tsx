@@ -35,9 +35,8 @@ export function GroupMarkers({ layout, cx, cy }: GroupMarkersProps) {
               textAnchor="middle"
               dominantBaseline="middle"
               fontSize={7}
-              fill="#4a7fa8"
+              fill="var(--viz-text-muted)"
               letterSpacing={1.5}
-              fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif"
               style={{ userSelect: 'none' }}
             >
               {label}

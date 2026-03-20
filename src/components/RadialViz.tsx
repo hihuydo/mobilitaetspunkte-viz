@@ -55,7 +55,7 @@ export function RadialViz({
     <svg
       width={width}
       height={height}
-      style={{ display: 'block', background: '#0f1b2d' }}
+      style={{ display: 'block', background: 'var(--viz-bg)' }}
     >
       {/* Star field */}
       <g transform={`translate(${cx},${cy})`}>

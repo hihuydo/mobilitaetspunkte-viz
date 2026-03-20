@@ -37,7 +37,7 @@ export function ServiceRings({
           key={`sep-${ring.ringIndex}`}
           r={ring.innerR}
           fill="none"
-          stroke="#1a2a45"
+          stroke="var(--viz-separator)"
           strokeWidth={0.5}
         />
       ))}
@@ -82,7 +82,7 @@ export function ServiceRings({
               const fill = hasService ? svc.color : ABSENT_COLOR
               const stroke =
                 isStationHover && station.stationIndex === hoveredStationIndex && hasService
-                  ? 'rgba(255,255,255,0.5)'
+                  ? 'var(--viz-stroke-hover)'
                   : 'none'
 
               const path = arcPath(ring.innerR, ring.outerR, station.fillStartAngle, station.fillEndAngle)
