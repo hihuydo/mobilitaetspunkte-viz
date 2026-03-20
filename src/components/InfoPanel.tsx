@@ -9,7 +9,7 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
         position: 'absolute',
         top: 16,
         left: 16,
-        width: 220,
+        width: 280,
         maxHeight: 'calc(100% - 32px)',
         overflowY: 'auto',
         background: 'rgba(10, 18, 32, 0.94)',
@@ -44,7 +44,7 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
       {/* Title */}
       <div
         style={{
-          fontSize: 12,
+          fontSize: 16,
           fontWeight: 600,
           color: '#c9d8e8',
           letterSpacing: '0.5px',
@@ -58,7 +58,7 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
       {/* Section 1: Was du siehst */}
       <div
         style={{
-          fontSize: 9,
+          fontSize: 14,
           color: '#4a7fa8',
           letterSpacing: '1px',
           textTransform: 'uppercase',
@@ -69,7 +69,7 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
       </div>
       <div
         style={{
-          fontSize: 11,
+          fontSize: 16,
           color: '#6a94b0',
           lineHeight: 1.55,
           marginBottom: 10,
@@ -94,7 +94,7 @@ export function InfoPanel({ onClose }: InfoPanelProps) {
       {/* Section 2: Wie erkunden */}
       <div
         style={{
-          fontSize: 9,
+          fontSize: 14,
           color: '#4a7fa8',
           letterSpacing: '1px',
           textTransform: 'uppercase',
