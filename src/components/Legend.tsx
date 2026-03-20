@@ -19,30 +19,19 @@ export function Legend({
   return (
     <div
       style={{
-        minHeight: 48,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
         gap: 4,
-        padding: '0 16px',
+        padding: 0,
         opacity: containerOpacity,
         transition: 'opacity 150ms ease-out',
         fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
       }}
     >
-      <div
-        style={{
-          fontSize: 10,
-          color: '#4a7fa8',
-          letterSpacing: 1,
-          marginBottom: 2,
-          userSelect: 'none',
-        }}
-      >
-        SERVICE RINGS (inner → outer)
-      </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', justifyContent: 'center' }}>
+      {/* Items list — vertical */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {SERVICE_DEFINITIONS.map((svc, i) => {
           const isHovered = hoveredRingIndex === i
           const labelColor = isHovered
@@ -54,7 +43,7 @@ export function Legend({
           return (
             <div
               key={svc.field}
-              style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
               onMouseEnter={() => onRingEnter(i)}
               onMouseLeave={onRingLeave}
             >
@@ -71,7 +60,7 @@ export function Legend({
               />
               <span
                 style={{
-                  fontSize: 11,
+                  fontSize: 12,
                   color: labelColor,
                   transition: 'color 150ms ease-out',
                   userSelect: 'none',
