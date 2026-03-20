@@ -1,13 +1,15 @@
+// src/App.tsx
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useRadialLayout } from './hooks/useRadialLayout'
 import { RadialViz } from './components/RadialViz'
-import { Legend } from './components/Legend'
+import { Sidebar } from './components/Sidebar'
 import { Tooltip } from './components/Tooltip'
 import { InfoPanel } from './components/InfoPanel'
+import { Button } from '@/components/ui/button'
+import { Info } from 'lucide-react'
 import type { StationGeometry } from './lib/layout'
 
 export default function App() {
-  // Measure SVG container dimensions here in App — hook accepts them as params
   const svgContainerRef = useRef<HTMLDivElement>(null)
   const [svgDimensions, setSvgDimensions] = useState({ width: 0, height: 0 })
 
@@ -27,23 +29,32 @@ export default function App() {
 
   const { layout, groups, error } = useRadialLayout(svgDimensions.width, svgDimensions.height)
 
-  // Hover state — lifted here so Legend and RadialViz can share it
+  // Hover state
   const [hoveredRingIndex, setHoveredRingIndex] = useState<number | null>(null)
   const [hoveredStationIndex, setHoveredStationIndex] = useState<number | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-  const [infoPanelVisible, setInfoPanelVisible] = useState(true)
 
-  // Track mouse position for tooltip
+  // Info panel state
+  const [infoPanelVisible, setInfoPanelVisible] = useState(false)
+  const handleInfoPanelClose = useCallback(() => setInfoPanelVisible(false), [])
+  const handleInfoPanelOpen = useCallback(() => setInfoPanelVisible(true), [])
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [activeStationIndices, setActiveStationIndices] = useState<Set<number>>(new Set())
+
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     setMousePos({ x: e.clientX, y: e.clientY })
   }, [])
 
   const handleRingLeave = useCallback(() => setHoveredRingIndex(null), [])
   const handleStationLeave = useCallback(() => setHoveredStationIndex(null), [])
-  const handleInfoPanelClose = useCallback(() => setInfoPanelVisible(false), [])
-  const handleInfoPanelOpen = useCallback(() => setInfoPanelVisible(true), [])
 
-  // Find hovered station geometry for tooltip
+  const handleSearch = useCallback((query: string, indices: Set<number>) => {
+    setSearchQuery(query)
+    setActiveStationIndices(indices)
+  }, [])
+
   const hoveredStation: StationGeometry | null =
     hoveredStationIndex !== null && layout
       ? (layout.stations.find((s) => s.stationIndex === hoveredStationIndex) ?? null)
@@ -51,24 +62,16 @@ export default function App() {
 
   if (error) {
     return (
-      <div style={{ color: '#cc4444', padding: 32, fontFamily: 'monospace' }}>
+      <div className="p-8 text-destructive font-mono">
         Error loading data: {error}
       </div>
     )
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100vh',
-        background: '#0f1b2d',
-      }}
-      onMouseMove={handleMouseMove}
-    >
-      {/* SVG container — flex:1, takes all space above legend */}
-      <div ref={svgContainerRef} style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+    <div className="flex flex-row h-screen bg-background" onMouseMove={handleMouseMove}>
+      {/* SVG container — flex:1, full height */}
+      <div ref={svgContainerRef} className="flex-1 relative overflow-hidden">
         {layout && svgDimensions.width > 0 && svgDimensions.height > 0 ? (
           <RadialViz
             layout={layout}
@@ -77,56 +80,38 @@ export default function App() {
             height={svgDimensions.height}
             hoveredRingIndex={hoveredRingIndex}
             hoveredStationIndex={hoveredStationIndex}
+            activeStationIndices={activeStationIndices}
+            isInteracting={hoveredStationIndex !== null || hoveredRingIndex !== null}
             onStationEnter={setHoveredStationIndex}
             onStationLeave={handleStationLeave}
           />
         ) : (
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#4a7fa8',
-              fontSize: 14,
-              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-            }}
-          >
+          <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
             Lade Daten…
           </div>
         )}
+
+        {/* Info panel overlay */}
         {infoPanelVisible ? (
           <InfoPanel onClose={handleInfoPanelClose} />
         ) : (
-          <button
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleInfoPanelOpen}
             title="Legende anzeigen"
-            style={{
-              position: 'absolute',
-              top: 16,
-              left: 16,
-              width: 28,
-              height: 28,
-              background: 'rgba(10, 18, 32, 0.94)',
-              border: '1px solid #1a2a45',
-              borderRadius: '50%',
-              color: '#4a7fa8',
-              fontSize: 13,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 10,
-            }}
+            className="absolute top-4 left-4 z-10"
           >
-            ℹ
-          </button>
+            <Info size={18} />
+          </Button>
         )}
       </div>
 
-      {/* Legend strip */}
-      <Legend
+      {/* Right sidebar */}
+      <Sidebar
+        stations={layout ? layout.stations : []}
+        searchQuery={searchQuery}
+        onSearch={handleSearch}
         hoveredRingIndex={hoveredRingIndex}
         isStationHover={hoveredStationIndex !== null}
         onRingEnter={setHoveredRingIndex}

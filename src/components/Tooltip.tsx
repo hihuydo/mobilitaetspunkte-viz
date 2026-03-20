@@ -1,3 +1,4 @@
+// src/components/Tooltip.tsx
 import { createPortal } from 'react-dom'
 import { SERVICE_DEFINITIONS } from '../lib/colors'
 import type { StationGeometry } from '../lib/layout'
@@ -11,7 +12,6 @@ interface TooltipProps {
 export function Tooltip({ station, mouseX, mouseY }: TooltipProps) {
   if (station === null) return null
 
-  // Compute clamped position inline — pure math, no useEffect needed
   const OFFSET = 12
   const W = 220
   const H = 180
@@ -30,48 +30,32 @@ export function Tooltip({ station, mouseX, mouseY }: TooltipProps) {
 
   const tooltip = (
     <div
-      style={{
-        position: 'fixed',
-        left: x,
-        top: y,
-        background: '#0a1220',
-        border: '1px solid #1a2a45',
-        borderRadius: 6,
-        padding: '12px 14px',
-        maxWidth: 220,
-        boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
-        pointerEvents: 'none',
-        zIndex: 1000,
-        fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-      }}
+      className="fixed z-50 pointer-events-none bg-popover border border-border rounded-md shadow-lg px-3 py-2 max-w-[220px]"
+      style={{ left: x, top: y }}
     >
-      <div style={{ fontSize: 13, fontWeight: 600, color: '#c9d8e8', marginBottom: 2 }}>
+      <div className="text-sm font-semibold text-foreground mb-0.5">
         {station.name}
       </div>
-      <div style={{ fontSize: 11, color: '#6a94b0', marginBottom: 8 }}>
+      <div className="text-xs text-muted-foreground mb-2">
         {station.adresse}
       </div>
-      <div style={{ borderTop: '1px solid #1a2a45', paddingTop: 8, marginBottom: 8 }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 8px' }}>
+      <div className="border-t border-border pt-2 mb-2">
+        <div className="flex flex-wrap gap-x-2 gap-y-1">
           {activeServices.map((svc) => (
-            <div key={svc.field} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div key={svc.field} className="flex items-center gap-1">
+              {/* svc.color is a data-encoding visualization color — intentionally not a token */}
               <div
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  background: svc.color,
-                  flexShrink: 0,
-                }}
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{ background: svc.color }}
               />
-              <span style={{ fontSize: 11, color: '#8ab4d4' }}>{svc.label}</span>
+              <span className="text-xs text-muted-foreground">{svc.label}</span>
             </div>
           ))}
         </div>
       </div>
       {station.anzStellplCs > 0 && (
-        <div style={{ borderTop: '1px solid #1a2a45', paddingTop: 8 }}>
-          <span style={{ fontSize: 11, color: '#6a94b0' }}>
+        <div className="border-t border-border pt-2">
+          <span className="text-xs text-muted-foreground">
             Carsharing-Stellplätze: {station.anzStellplCs}
           </span>
         </div>

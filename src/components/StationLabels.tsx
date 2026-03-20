@@ -6,6 +6,7 @@ interface StationLabelsProps {
   cy: number
   hoveredStationIndex: number | null
   isRingHover: boolean
+  activeStationIndices: Set<number>
   onStationEnter: (index: number) => void
   onStationLeave: () => void
 }
@@ -16,12 +17,13 @@ export function StationLabels({
   cy,
   hoveredStationIndex,
   isRingHover,
+  activeStationIndices,
   onStationEnter,
   onStationLeave,
 }: StationLabelsProps) {
-  const labelR = layout.labelR
+  const R = layout.labelR
   const connectorInnerR = layout.ringZoneOuterR
-  const connectorOuterR = layout.labelR
+  const isSearchActive = activeStationIndices.size > 0
 
   return (
     <g transform={`translate(${cx},${cy})`}>
@@ -36,6 +38,10 @@ export function StationLabels({
         } else if (isRingHover) {
           opacity = 0.3
           fill = '#6a94b0'
+        } else if (isSearchActive) {
+          const isMatch = activeStationIndices.has(station.stationIndex)
+          opacity = isMatch ? 1 : 0.08
+          fill = isMatch ? '#c9d8e8' : '#6a94b0'
         } else {
           opacity = 1
           fill = '#6a94b0'
@@ -51,17 +57,24 @@ export function StationLabels({
         const angleDeg = (station.midAngle * 180) / Math.PI
 
         const transform = station.labelFlip
-          ? `rotate(${angleDeg}) translate(${labelR}, 0) rotate(180)`
-          : `rotate(${angleDeg}) translate(${labelR}, 0)`
+          ? `rotate(${angleDeg}) translate(${R}, 0) rotate(180)`
+          : `rotate(${angleDeg}) translate(${R}, 0)`
+
+        // midAngle starts at -π/2 (top) and sweeps clockwise to ~3π/2; +350ms after arcs
+        const entryDelay = ((station.midAngle + Math.PI / 2) / (2 * Math.PI)) * 600 + 350
 
         return (
-          <g key={station.stationIndex}>
+          <g
+            key={station.stationIndex}
+            className="station-entry"
+            style={{ animationDelay: `${entryDelay}ms` }}
+          >
             {/* Connector line from outer ring edge to label start */}
             <line
               x1={connectorInnerR * cos}
               y1={connectorInnerR * sin}
-              x2={connectorOuterR * cos}
-              y2={connectorOuterR * sin}
+              x2={R * cos}
+              y2={R * sin}
               stroke={fill}
               strokeWidth={0.5}
               opacity={opacity}

@@ -8,6 +8,8 @@ interface ServiceRingsProps {
   cy: number
   hoveredStationIndex: number | null
   hoveredRingIndex: number | null
+  activeStationIndices: Set<number>
+  isInteracting: boolean
   onStationEnter: (index: number) => void
   onStationLeave: () => void
 }
@@ -18,14 +20,17 @@ export function ServiceRings({
   cy,
   hoveredStationIndex,
   hoveredRingIndex,
+  activeStationIndices,
+  isInteracting,
   onStationEnter,
   onStationLeave,
 }: ServiceRingsProps) {
   const isStationHover = hoveredStationIndex !== null
   const isRingHover = hoveredRingIndex !== null
+  const isSearchActive = activeStationIndices.size > 0
 
   return (
-    <g transform={`translate(${cx},${cy})`}>
+    <g transform={`translate(${cx},${cy})`} className={isInteracting ? 'rings-interacting' : undefined}>
       {/* Ring separator lines */}
       {layout.rings.map((ring) => (
         <circle
@@ -44,12 +49,21 @@ export function ServiceRings({
           stationOpacity = station.stationIndex === hoveredStationIndex ? 1 : 0.08
         } else if (isRingHover) {
           stationOpacity = 1 // per-ring opacity handled per segment below
+        } else if (isSearchActive) {
+          stationOpacity = activeStationIndices.has(station.stationIndex) ? 1 : 0.08
         } else {
           stationOpacity = 0.85
         }
 
+        // midAngle starts at -π/2 (top) and sweeps clockwise to ~3π/2
+        const entryDelay = ((station.midAngle + Math.PI / 2) / (2 * Math.PI)) * 600
+
         return (
-          <g key={`station-${station.stationIndex}`}>
+          <g
+            key={`station-${station.stationIndex}`}
+            className="station-entry"
+            style={{ animationDelay: `${entryDelay}ms` }}
+          >
             {SERVICE_DEFINITIONS.map((svc, ringIndex) => {
               const ring = layout.rings[ringIndex]
               const hasService = station.services[svc.field] === true
@@ -76,7 +90,8 @@ export function ServiceRings({
               return (
                 <path
                   key={`${station.stationIndex}-${ringIndex}`}
-                  className="arc-path"
+                  className="arc-path ring-pulse"
+                  style={{ animationDelay: `${ringIndex * 320}ms` }}
                   d={path}
                   fill={fill}
                   stroke={stroke}
