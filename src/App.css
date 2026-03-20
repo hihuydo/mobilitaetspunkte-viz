@@ -12,3 +12,13 @@ html, body, #root {
   color: #c9d8e8;
   overflow: hidden;
 }
+
+/* Ensure SVG text is sharp */
+svg text {
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Smooth arc transitions */
+svg path {
+  transition: opacity 150ms ease-out;
+}

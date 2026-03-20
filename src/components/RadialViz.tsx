@@ -13,6 +13,9 @@ interface RadialVizProps {
   width: number
   height: number
   hoveredRingIndex: number | null
+  hoveredStationIndex?: number | null
+  onStationEnter?: (index: number) => void
+  onStationLeave?: () => void
 }
 
 export function RadialViz({
@@ -21,16 +24,24 @@ export function RadialViz({
   width,
   height,
   hoveredRingIndex,
+  hoveredStationIndex: hoveredStationIndexProp,
+  onStationEnter,
+  onStationLeave,
 }: RadialVizProps) {
-  const [hoveredStationIndex, setHoveredStationIndex] = useState<number | null>(null)
+  const [hoveredStationIndexInternal, setHoveredStationIndexInternal] = useState<number | null>(null)
+
+  // Use controlled value if provided, otherwise fall back to internal state
+  const hoveredStationIndex = hoveredStationIndexProp !== undefined ? hoveredStationIndexProp : hoveredStationIndexInternal
 
   const handleStationEnter = useCallback((index: number) => {
-    setHoveredStationIndex(index)
-  }, [])
+    setHoveredStationIndexInternal(index)
+    onStationEnter?.(index)
+  }, [onStationEnter])
 
   const handleStationLeave = useCallback(() => {
-    setHoveredStationIndex(null)
-  }, [])
+    setHoveredStationIndexInternal(null)
+    onStationLeave?.()
+  }, [onStationLeave])
 
   const cx = width / 2
   const cy = height / 2
