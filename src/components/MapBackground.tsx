@@ -64,7 +64,7 @@ export function MapBackground({ width, height, cx, cy }: MapBackgroundProps) {
   return (
     <>
       {/* Munich district outlines */}
-      <g opacity={0.22}>
+      <g opacity={0.45}>
         {districtPaths.map(({ d, name }) => (
           <path
             key={name}
