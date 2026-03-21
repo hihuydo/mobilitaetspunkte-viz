@@ -15,13 +15,26 @@
   - This guarantees pixel-perfect alignment between GeoJSON paths and station dots
 - `geoTransform` + `geoPath` is the correct d3 API for custom projections (not raw function)
 
+## District Station Count via geoContains
+
+- To count stations per district: store `lonlat: [number, number]` on MapStation (computed once at layout time via proj4 UTM→WGS84)
+- In MapBackground, use `d3.geoContains(feature, station.lonlat)` per station per district
+- Memoize the count map (`useMemo` keyed on `districtPaths + stations`) — recomputing on every render would be expensive
+- `geoContains` works on raw GeoJSON Feature objects (before projection), not on screen coords
+
 ## OSM / Overpass for City Districts
 
 - Munich Stadtbezirke: admin_level=9 within admin_level=6 (München)
 - Working Overpass query: `area["name"="München"]["admin_level"="6"]->.searchArea; relation["admin_level"="9"](area.searchArea); out geom;`
-- OSM returns `[out:json]` with way geometries; needs manual ring-merging to build closed polygons
-- Alternative clean source: GitHub Gist freinold/26eba0e6038bc1cff80cf250bde402ab (69 KB, all Polygons, WGS84)
+- Clean source: GitHub Gist freinold/26eba0e6038bc1cff80cf250bde402ab (69 KB, all Polygons, WGS84)
 - Simplifying coordinate precision to 4 decimal places (~11m) reduces file size: 228 KB → 158 KB
+
+## SVG Path Syntax (Q command)
+
+- SVG `Q` (quadratic Bézier) requires exactly 4 numbers: `Q cx cy x y` (control point + end point)
+- Chaining multiple curves: each segment needs its own full `Q cx cy x y` — they do NOT auto-chain like `T`
+- Symptom of malformed path: `<path> attribute d: Expected number` browser console errors, path renders partially or not at all
+- Fix: split into array of complete segments and `.join(' ')`
 
 ## SVG Glow without Filters
 
@@ -34,9 +47,35 @@
 
 - Unified filter in App.tsx: compute `activeIndices: Set<number>` from all filters combined
 - MapDots receives `isFiltering` + `activeIndices` — stays dumb, only dims/brightens
-- AND-Logik für Dienst-Filter: `[...activeServiceFields].every(f => s.services[f])`
-- Gruppen-Filter + Suche + Dienst-Filter kombinierbar in einem `useMemo`
-- Service-Chip-Farben als Hex-Map in ServiceFilter.tsx (CSS vars unzuverlässig in inline styles)
+- AND-Logik für Service-Filter: `[...activeServiceFields].every(f => s.services[f])`
+- Anschluss-Filter + Suche + Mobilitätsangebote-Filter kombinierbar in einem `useMemo`
+- Service-Chip-Farben als Hex-Map in `lib/colors.ts` (CSS vars unzuverlässig in inline styles/tooltip)
+
+## Dropdown z-index über SVG
+
+- Ein `position: absolute` Dropdown in einer Flex-Zeile wird von nachfolgenden SVG-Elementen überdeckt
+- Fix 1: `overflow-x-auto` auf dem Container entfernen — das clipped absolute children
+- Fix 2: Container bekommt `position: relative; z-index: 20` → schafft eigenen Stacking Context über der Karte
+- Das SVG darunter hat kein eigenes z-index → bleibt im default stacking context (unter z-20)
+
+## Programmatische Klicks in React (Preview-Tool)
+
+- `element.click()` und `element.dispatchEvent(new MouseEvent('click', ...))` triggern React Synthetic Events NICHT zuverlässig im Preview-Tool
+- Stattdessen: Stacking Context via computed styles prüfen (`getComputedStyle(el).zIndex`) um Fix zu verifizieren
+- Oder: direkt DOM-Inhalt nach dem Click abfragen um zu prüfen ob der State sich geändert hat
+
+## URL-Parameter für Stationsauswahl
+
+- `window.history.replaceState(null, '', '?station=...')` — kein Page-Reload, nur URL-Update
+- `encodeURIComponent(station.name)` für Stationsnamen mit Umlauten/Sonderzeichen
+- Restore on mount: `useEffect` auf `stations` warten (leer beim ersten Render), dann URL lesen und passende Station selektieren
+- Achtung: `handleSelect` braucht `stations` als Dependency im `useCallback`
+
+## Dark-Mode Textfarben
+
+- Sehr dunkle Textfarben (#4a6080, #5a7090) auf dunklem Hintergrund (#080d14) ergeben Kontrastverhältnis < 2:1 — unlesbar
+- Faustregel für diese Palette: Muted-Text muss mindestens bei ~#7a90a8 liegen für 3:1, ~#8aacc4 für 4.5:1
+- Primärfarbe (#d0ccc8) hat ausreichend Kontrast
 
 ## Worktree
 

@@ -1,19 +1,37 @@
 # Mobilitätspunkte Viz — Todo
 
-## Status: main — Karten-Viz mit Service-Filtern
+## Status: main — UX-polished, mobile-ready, pushed
 
 ## Done
 - [x] Full radial viz (legacy, replaced by map)
 - [x] Map viz: parseData, mapProjection, mapLayout, CSS tokens, all components
 - [x] Munich Stadtbezirke outlines as map background
 - [x] Merge feature/map-viz → main
-- [x] Service-Filter (11 Dienst-Chips mit AND-Logik, Counter, Reset)
-- [x] Unified filter pipeline (Gruppe + Suche + Dienste kombiniert)
-- [x] Fix: @types/geojson + proj4 type declarations for clean build
+- [x] Service-Filter (AND-Logik, Counter, Reset)
+- [x] Unified filter pipeline (Anschluss + Suche + Mobilitätsangebote kombiniert)
+- [x] Fix: @types/geojson + proj4 type declarations
+- [x] 7 UX improvements: tooltip, subtitle, idle panel, merged filters, selection label, district hover, zoom/pan
+- [x] Mobile-responsive layout (bottom-sheet, NavBar stacking, touch-friendly zoom buttons)
+- [x] Fix: SVG path error in Isar river (malformed Q commands)
+- [x] Zoom controls moved to top-right
+- [x] Size legend moved to bottom-right corner
+- [x] 9 further UX improvements:
+  - Mobilitätsangebote dropdown (statt inline chips)
+  - Anschluss chips mit Stationsanzahl-Badge
+  - Empty state overlay bei 0 Treffern
+  - Tooltip zeigt farbige Service-Dots
+  - District hover zeigt Stationsanzahl (geoContains)
+  - Idle panel "→ anzeigen"-Buttons für schnelle Filterung
+  - Stärkerer visueller Ring für selektierte Dots
+  - Live-Trefferanzahl neben Suchfeld
+  - URL-Parameter ?station= für geteilte Links
+- [x] Fix: Mobilitätsangebote-Dropdown nicht hinter Karte (z-20, overflow entfernt)
+- [x] Textfarben aufgehellt (map-text-muted, map-text-dim) für bessere Lesbarkeit
+- [x] Schriftgrößen erhöht (filter bar, nav, detail panel, legend)
+- [x] Umbenennung: Gruppe → Anschluss, Dienste → Mobilitätsangebote
 
 ## Next
-- [ ] Deploy to Vercel (pnpm build confirmed clean)
-- [ ] Consider: tooltip with station name on hover
-- [ ] Consider: mobile layout / responsive breakpoints
+- [ ] Deploy to Vercel
 - [ ] Consider: Bezirks-Aggregation (Choropleth nach Versorgungsgrad)
 - [ ] Consider: Vergleichs-/Ranking-Ansicht (sortierbare Liste)
+- [ ] Consider: Share-Button mit URL-Kopie
