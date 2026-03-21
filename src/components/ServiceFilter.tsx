@@ -63,7 +63,7 @@ export function ServiceFilter({
 }: ServiceFilterProps) {
   return (
     <div
-      className="flex items-center gap-2 px-5 py-1.5 flex-shrink-0 border-b overflow-x-auto flex-nowrap"
+      className="flex items-center gap-2 px-3 md:px-5 py-1.5 flex-shrink-0 border-b overflow-x-auto flex-nowrap"
       style={{ background: 'var(--map-surface)', borderColor: 'var(--map-border)' }}
     >
       {/* ── Group chips ─────────────────────────────────────────── */}

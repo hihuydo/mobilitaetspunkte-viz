@@ -248,3 +248,13 @@ svg text {
 .info-pulse {
   animation: info-pulse 2s ease-in-out infinite;
 }
+
+/* Bottom-sheet slide-up animation (mobile detail panel) */
+@keyframes bottom-sheet-enter {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.bottom-sheet-enter {
+  animation: bottom-sheet-enter 250ms ease-out;
+}

@@ -12,8 +12,11 @@ const OFFSET = 12
 const TOOLTIP_W = 200
 const TOOLTIP_H = 60
 
+const isTouchDevice = typeof window !== 'undefined' && 'ontouchstart' in window
+
 export default function MapTooltip({ station, mouseX, mouseY }: MapTooltipProps) {
-  if (!station) return null
+  // Hide tooltip on touch devices — bottom-sheet handles details
+  if (!station || isTouchDevice) return null
 
   const flipX = mouseX + OFFSET + TOOLTIP_W > window.innerWidth
   const flipY = mouseY + OFFSET + TOOLTIP_H > window.innerHeight

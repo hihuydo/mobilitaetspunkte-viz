@@ -177,7 +177,7 @@ export default function App() {
         </div>
 
         {/* Detail panel */}
-        <DetailPanel station={selectedStation} allStations={stations} />
+        <DetailPanel station={selectedStation} allStations={stations} onClose={handleDeselect} />
       </div>
 
       {/* Hover tooltip */}

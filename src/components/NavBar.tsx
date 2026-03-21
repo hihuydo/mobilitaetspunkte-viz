@@ -13,19 +13,19 @@ interface NavBarProps {
 export function NavBar({ searchQuery, onSearch, stationCount, matchCount, isFiltering }: NavBarProps) {
   return (
     <header
-      className="grid grid-cols-[1fr_auto_1fr] items-center px-5 py-2.5 flex-shrink-0 border-b gap-4"
+      className="flex flex-col gap-1.5 px-4 py-2 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:px-5 md:py-2.5 md:gap-4 flex-shrink-0 border-b"
       style={{ background: 'var(--map-surface)', borderColor: 'var(--map-border)' }}
     >
-      {/* Left: Title + subtitle */}
+      {/* Title + subtitle */}
       <div className="flex flex-col">
         <span
-          className="text-[15px] font-bold uppercase tracking-[.06em] whitespace-nowrap"
+          className="text-[13px] md:text-[15px] font-bold uppercase tracking-[.06em] whitespace-nowrap"
           style={{ color: 'var(--map-text-primary)' }}
         >
           Münchner Mobilitätspunkte
         </span>
         <span
-          className="text-[11px] whitespace-nowrap"
+          className="text-[10px] md:text-[11px] whitespace-nowrap"
           style={{ color: 'var(--map-text-dim)' }}
         >
           {isFiltering
@@ -34,8 +34,8 @@ export function NavBar({ searchQuery, onSearch, stationCount, matchCount, isFilt
         </span>
       </div>
 
-      {/* Center: Search */}
-      <div className="relative w-full max-w-[480px] justify-self-center">
+      {/* Search */}
+      <div className="relative w-full md:max-w-[480px] md:justify-self-center">
         <Search
           size={13}
           className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
@@ -54,8 +54,8 @@ export function NavBar({ searchQuery, onSearch, stationCount, matchCount, isFilt
         />
       </div>
 
-      {/* Right: empty for balance */}
-      <div />
+      {/* Right: empty for balance (desktop only) */}
+      <div className="hidden md:block" />
     </header>
   )
 }

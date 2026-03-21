@@ -124,18 +124,18 @@ export function MapViz({
         </g>
       </svg>
 
-      {/* Zoom controls */}
-      <div className="absolute bottom-16 right-4 flex flex-col gap-1 z-10">
+      {/* Zoom controls — larger touch targets on mobile */}
+      <div className="absolute bottom-16 right-3 md:right-4 flex flex-col gap-1 z-10">
         <button
           onClick={handleZoomIn}
-          className="w-7 h-7 flex items-center justify-center rounded border text-xs font-bold"
+          className="w-9 h-9 md:w-7 md:h-7 flex items-center justify-center rounded border text-sm md:text-xs font-bold"
           style={{ background: 'var(--map-surface)', borderColor: 'var(--map-border)', color: 'var(--map-text-muted)' }}
         >
           +
         </button>
         <button
           onClick={handleZoomOut}
-          className="w-7 h-7 flex items-center justify-center rounded border text-xs font-bold"
+          className="w-9 h-9 md:w-7 md:h-7 flex items-center justify-center rounded border text-sm md:text-xs font-bold"
           style={{ background: 'var(--map-surface)', borderColor: 'var(--map-border)', color: 'var(--map-text-muted)' }}
         >
           −
@@ -143,7 +143,7 @@ export function MapViz({
         {zoomScale > 1.05 && (
           <button
             onClick={handleReset}
-            className="w-7 h-7 flex items-center justify-center rounded border text-[8px] font-bold"
+            className="w-9 h-9 md:w-7 md:h-7 flex items-center justify-center rounded border text-[9px] md:text-[8px] font-bold"
             style={{ background: 'var(--map-surface)', borderColor: 'var(--map-border)', color: 'var(--map-text-muted)' }}
           >
             1:1

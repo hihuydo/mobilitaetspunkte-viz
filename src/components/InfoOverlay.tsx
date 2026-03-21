@@ -30,7 +30,7 @@ export function InfoOverlay() {
       {/* Panel */}
       {open && (
         <div
-          className="mt-1.5 w-[260px] rounded-lg border p-3.5 text-[11px] leading-relaxed"
+          className="mt-1.5 w-[calc(100vw-32px)] max-w-[260px] rounded-lg border p-3.5 text-[11px] leading-relaxed"
           style={{
             background: 'var(--map-surface)',
             borderColor: 'var(--map-border)',
