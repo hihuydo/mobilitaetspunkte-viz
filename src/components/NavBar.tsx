@@ -30,7 +30,7 @@ export function NavBar({ searchQuery, onSearch, stationCount, matchCount, isFilt
         >
           {isFiltering
             ? `${matchCount} von ${stationCount} Stationen`
-            : `${stationCount} Stationen · 11 Dienste · Erkunde Münchens Mobilitätsnetz`}
+            : `${stationCount} Stationen · 11 Mobilitätsangebote · Erkunde Münchens Mobilitätsnetz`}
         </span>
       </div>
 

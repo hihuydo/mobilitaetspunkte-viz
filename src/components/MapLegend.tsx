@@ -37,7 +37,7 @@ export function MapLegend() {
           <text x="8"  y="15" fontSize="7" fill="#4a6080" textAnchor="middle">1</text>
           <text x="76" y="15" fontSize="7" fill="#4a6080" textAnchor="end">11</text>
         </svg>
-        Größe = Anzahl Dienste
+        Größe = Anzahl Angebote
       </div>
     </>
   )

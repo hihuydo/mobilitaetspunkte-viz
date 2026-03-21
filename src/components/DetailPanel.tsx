@@ -66,14 +66,14 @@ function IdleContent({ allStations, onFilterService }: { allStations: MapStation
           <span className="text-[14px]" style={{ color: 'var(--map-text-muted)' }}>Stationen</span>
         </div>
         <p className="text-[13px]" style={{ color: 'var(--map-text-dim)' }}>
-          Ø {avgServices.toLocaleString('de-DE', { maximumFractionDigits: 1 })} Dienste pro Station
+          Ø {avgServices.toLocaleString('de-DE', { maximumFractionDigits: 1 })} Angebote pro Station
         </p>
       </div>
 
       <Separator className="mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
 
       <div className="px-[18px] py-4">
-        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Nach Gruppe</p>
+        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Nach Anschluss</p>
         {groupCounts.map(({ key, label, count, color: gColor }) => (
           <div key={key} className="flex items-center gap-2 mb-1.5">
             <span className="text-[12px] w-[64px] flex-shrink-0" style={{ color: gColor }}>{label}</span>
@@ -88,7 +88,7 @@ function IdleContent({ allStations, onFilterService }: { allStations: MapStation
       <Separator className="mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
 
       <div className="px-[18px] py-4">
-        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Häufigste Dienste</p>
+        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Häufigste Angebote</p>
         {topServices.map(({ field, label, color: sColor, count }) => (
           <div key={field} className="flex items-center gap-2 mb-1.5">
             <span className="text-[12px] w-[80px] flex-shrink-0 truncate" style={{ color: 'var(--map-text-muted)' }}>{label}</span>
@@ -113,7 +113,7 @@ function IdleContent({ allStations, onFilterService }: { allStations: MapStation
       <Separator className="mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
 
       <div className="px-[18px] py-4">
-        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Seltenste Dienste</p>
+        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Seltenste Angebote</p>
         {rarestServices.map(({ field, label, color: sColor, count }) => (
           <div key={field} className="flex items-center gap-2 mb-1.5">
             <span className="text-[12px] w-[80px] flex-shrink-0 truncate" style={{ color: 'var(--map-text-muted)' }}>{label}</span>
@@ -164,7 +164,7 @@ function StationContent({ station, allStations }: { station: MapStation; allStat
       <Separator className="my-3.5 mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
 
       <div className="px-[18px] pb-3.5">
-        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Dienste im Vergleich</p>
+        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Mobilitätsangebote im Vergleich</p>
         <div className="flex items-baseline gap-1.5 mb-3">
           <span className="text-[42px] font-black leading-none tracking-[-0.04em]" style={{ color }}>{station.serviceCount}</span>
           <span className="text-[14px]" style={{ color: 'var(--map-text-muted)' }}>von 11</span>
@@ -190,9 +190,9 @@ function StationContent({ station, allStations }: { station: MapStation; allStat
           <div className="mt-2.5 p-2.5 rounded-md border-l-2 text-[11px] leading-relaxed"
             style={{ background: `${color}0a`, borderLeftColor: `${color}66`, color: 'var(--map-text-muted)' }}>
             {diff > 0 ? (
-              <><span style={{ color }} className="font-semibold">+{diff.toLocaleString('de-DE', { maximumFractionDigits: 1 })}</span> über dem Gruppendurchschnitt</>
+              <><span style={{ color }} className="font-semibold">+{diff.toLocaleString('de-DE', { maximumFractionDigits: 1 })}</span> über dem Anschlussdurchschnitt</>
             ) : (
-              <><span style={{ color: '#ff4455' }} className="font-semibold">{diff.toLocaleString('de-DE', { maximumFractionDigits: 1 })}</span> unter dem Gruppendurchschnitt</>
+              <><span style={{ color: '#ff4455' }} className="font-semibold">{diff.toLocaleString('de-DE', { maximumFractionDigits: 1 })}</span> unter dem Anschlussdurchschnitt</>
             )}
           </div>
         )}
@@ -201,7 +201,7 @@ function StationContent({ station, allStations }: { station: MapStation; allStat
       <Separator className="mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
 
       <div className="px-[18px] py-4">
-        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Alle Dienste</p>
+        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Alle Mobilitätsangebote</p>
         <div className="grid grid-cols-2 gap-1">
           {SERVICE_DEFINITIONS.map((svc) => {
             const present = station.services[svc.field] === true

@@ -42,11 +42,11 @@ export function InfoOverlay() {
           </h3>
           {[
             ['🔍', 'Suche', 'Tippe einen Stationsnamen in die Suchleiste oben.'],
-            ['🎛️', 'Filtern', 'Nutze die Gruppe- und Dienste-Chips, um gezielt nach Verkehrsmitteln oder Services zu filtern. Mehrere Dienste = nur Stationen mit allen.'],
-            ['👆', 'Details', 'Klicke auf einen Punkt auf der Karte. Rechts erscheint ein Vergleich mit Gruppendurchschnitt und allen verfügbaren Diensten.'],
-            ['🔎', 'Zoom', 'Scrolle zum Zoomen oder nutze die + / − Buttons unten rechts. Ziehe die Karte zum Verschieben.'],
-            ['🎨', 'Farben & Größe', 'Farbe = primäre ÖPNV-Anbindung (S-Bahn, U-Bahn, Tram, Bus). Größe = Anzahl verfügbarer Dienste (1–11).'],
-            ['📊', 'Überblick', 'Ohne Auswahl zeigt das rechte Panel Gesamtstatistiken: Gruppen-Verteilung, häufigste und seltenste Dienste.'],
+            ['🎛️', 'Filtern', 'Nutze die Anschluss- und Mobilitätsangebote-Filter, um gezielt zu filtern. Mehrere Angebote = nur Stationen mit allen.'],
+            ['👆', 'Details', 'Klicke auf einen Punkt auf der Karte. Rechts erscheint ein Vergleich mit dem Anschlussdurchschnitt und allen verfügbaren Angeboten.'],
+            ['🔎', 'Zoom', 'Scrolle zum Zoomen oder nutze die + / − Buttons oben rechts. Ziehe die Karte zum Verschieben.'],
+            ['🎨', 'Farben & Größe', 'Farbe = primärer ÖPNV-Anschluss (S-Bahn, U-Bahn, Tram, Bus). Größe = Anzahl verfügbarer Angebote (1–11).'],
+            ['📊', 'Überblick', 'Ohne Auswahl zeigt das rechte Panel Gesamtstatistiken: Anschluss-Verteilung, häufigste und seltenste Angebote.'],
           ].map(([icon, title, text]) => (
             <div
               key={title as string}

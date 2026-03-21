@@ -71,7 +71,7 @@ export default function MapTooltip({ station, mouseX, mouseY }: MapTooltipProps)
           paddingLeft: 14,
         }}
       >
-        {station.serviceCount} von 11 Diensten
+        {station.serviceCount} von 11 Angeboten
       </div>
       <div style={{ display: 'flex', gap: 4, paddingLeft: 14, marginTop: 6, flexWrap: 'wrap' }}>
         {SERVICE_DEFINITIONS.filter((svc) => station.services[svc.field]).map((svc) => (

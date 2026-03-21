@@ -73,7 +73,7 @@ export function ServiceFilter({
         className="text-[11px] uppercase tracking-widest whitespace-nowrap"
         style={{ color: 'var(--map-text-dim)' }}
       >
-        Gruppe
+        Anschluss
       </span>
 
       {/* ── Group chips ─────────────────────────────────────────── */}
@@ -120,7 +120,7 @@ export function ServiceFilter({
           }
         >
           <span className="text-[11px] uppercase tracking-widest" style={{ color: 'var(--map-text-dim)' }}>
-            Dienste
+            Mobilitätsangebote
           </span>
           {activeServices.size > 0 && (
             <span
