@@ -1,23 +1,20 @@
 // src/App.tsx
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
-import { useRadialLayout } from './hooks/useRadialLayout'
-import { RadialViz } from './components/RadialViz'
-import { Sidebar } from './components/Sidebar'
-import { Tooltip } from './components/Tooltip'
-import { InfoPanel } from './components/InfoPanel'
-import { Button } from '@/components/ui/button'
-import { Info } from 'lucide-react'
-import type { StationGeometry } from './lib/layout'
-import { computeInsights } from './lib/insights'
-
-export type VizPhase = 'loading' | 'revealing' | 'interactive'
+import { useState, useCallback, useEffect, useRef } from 'react'
+import { useMapData } from './hooks/useMapData'
+import { MapViz } from './components/MapViz'
+import { NavBar } from './components/NavBar'
+import { DetailPanel } from './components/DetailPanel'
+import { InfoOverlay } from './components/InfoOverlay'
+import { MapLegend } from './components/MapLegend'
+import type { MapStation } from './lib/mapLayout'
 
 export default function App() {
-  const svgContainerRef = useRef<HTMLDivElement>(null)
+  // SVG container sizing
+  const mapContainerRef = useRef<HTMLDivElement>(null)
   const [svgDimensions, setSvgDimensions] = useState({ width: 0, height: 0 })
 
   useEffect(() => {
-    const el = svgContainerRef.current
+    const el = mapContainerRef.current
     if (!el) return
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0]
@@ -30,179 +27,104 @@ export default function App() {
     return () => observer.disconnect()
   }, [])
 
-  const { layout, groups, error } = useRadialLayout(svgDimensions.width, svgDimensions.height)
+  // Data
+  const { stations, error } = useMapData(svgDimensions.width, svgDimensions.height)
 
-  // VizPhase state machine: loading → revealing → interactive
-  const [vizPhase, setVizPhase] = useState<VizPhase>('loading')
-  const phaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Search
+  const [searchQuery, setSearchQuery] = useState('')
+  const handleSearch = useCallback((q: string) => setSearchQuery(q), [])
 
-  // Step 1: trigger reveal once layout is ready
+  // Group filter
+  const [activeGroupKeys, setActiveGroupKeys] = useState<Set<string>>(new Set())
+  const handleToggleGroup = useCallback((key: string) => {
+    setActiveGroupKeys((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }, [])
+
+  // Hover / select
+  const [hoveredIndex, setHoveredIndex]   = useState<number | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+
+  const handleHover    = useCallback((i: number | null) => setHoveredIndex(i), [])
+  const handleSelect   = useCallback((i: number) => {
+    setSelectedIndex((prev) => (prev === i ? null : i))
+  }, [])
+  const handleDeselect = useCallback(() => setSelectedIndex(null), [])
+
+  // Esc to deselect
   useEffect(() => {
-    if (layout) setVizPhase('revealing')
-  }, [layout])
-
-  // Step 2: transition to interactive after reveal duration
-  useEffect(() => {
-    if (vizPhase !== 'revealing') return
-    phaseTimerRef.current = setTimeout(() => setVizPhase('interactive'), 2400)
-    return () => {
-      if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current)
-    }
-  }, [vizPhase])
-
-  // Hover state (gated on vizPhase)
-  const [hoveredRingIndex, setHoveredRingIndex] = useState<number | null>(null)
-  const [hoveredStationIndex, setHoveredStationIndex] = useState<number | null>(null)
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-
-  const handleStationEnter = useCallback((index: number) => {
-    if (vizPhase !== 'interactive') return
-    setHoveredStationIndex(index)
-  }, [vizPhase])
-
-  const handleRingEnter = useCallback((index: number) => {
-    if (vizPhase !== 'interactive') return
-    setHoveredRingIndex(index)
-  }, [vizPhase])
-
-  const handleStationLeave = useCallback(() => setHoveredStationIndex(null), [])
-  const handleRingLeave = useCallback(() => setHoveredRingIndex(null), [])
-
-  // Selected station state
-  const [selectedStationIndex, setSelectedStationIndex] = useState<number | null>(null)
-
-  const handleStationSelect = useCallback((index: number) => {
-    if (vizPhase !== 'interactive') return
-    setSelectedStationIndex((prev) => prev === index ? null : index)
-  }, [vizPhase])
-
-  const handleDeselect = useCallback(() => setSelectedStationIndex(null), [])
-
-  // Esc key to deselect
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelectedStationIndex(null)
-    }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelectedIndex(null) }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // Info panel state
-  const [infoPanelVisible, setInfoPanelVisible] = useState(false)
-  const handleInfoPanelClose = useCallback(() => setInfoPanelVisible(false), [])
-  const handleInfoPanelOpen = useCallback(() => setInfoPanelVisible(true), [])
+  // When searching, build a synthetic activeGroupKeys from matching stations only.
+  // MapDots dims stations whose groupKey is NOT in activeGroupKeys — so we
+  // populate it with only the groups that have search matches.
+  const dotActiveKeys: Set<string> = (() => {
+    if (searchQuery === '') return activeGroupKeys
+    const searchLower = searchQuery.toLowerCase()
+    const matchingGroups = new Set(
+      stations
+        .filter((s) => {
+          const matchesGroup = activeGroupKeys.size === 0 || activeGroupKeys.has(s.groupKey)
+          return matchesGroup && s.name.toLowerCase().includes(searchLower)
+        })
+        .map((s) => s.groupKey)
+    )
+    // If nothing matches, return a non-empty set with a dummy key so all dots dim
+    return matchingGroups.size > 0 ? matchingGroups : new Set(['__none__'])
+  })()
 
-  // Search state
-  const [searchQuery, setSearchQuery] = useState('')
-  const [activeStationIndices, setActiveStationIndices] = useState<Set<number>>(new Set())
-
-  const handleSearch = useCallback((query: string, indices: Set<number>) => {
-    setSearchQuery(query)
-    setActiveStationIndices(indices)
-  }, [])
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    setMousePos({ x: e.clientX, y: e.clientY })
-  }, [])
-
-  // Derived: hovered + selected station objects
-  const hoveredStation: StationGeometry | null =
-    hoveredStationIndex !== null && layout
-      ? (layout.stations.find((s) => s.stationIndex === hoveredStationIndex) ?? null)
+  const selectedStation: MapStation | null =
+    selectedIndex !== null
+      ? (stations.find((s) => s.stationIndex === selectedIndex) ?? null)
       : null
-
-  const selectedStation: StationGeometry | null =
-    selectedStationIndex !== null && layout
-      ? (layout.stations.find((s) => s.stationIndex === selectedStationIndex) ?? null)
-      : null
-
-  const hoveredStationName: string | null = hoveredStation?.name ?? null
-
-  // Idle state: no hover, no selection, no search, fully interactive
-  const isIdle =
-    vizPhase === 'interactive' &&
-    selectedStationIndex === null &&
-    hoveredStationIndex === null &&
-    hoveredRingIndex === null &&
-    searchQuery === ''
-
-  const searchMatchCount = activeStationIndices.size
-
-  // Insights — computed once when layout is available
-  const insights = useMemo(() => {
-    if (!layout) return []
-    return computeInsights(layout.stations)
-  }, [layout])
 
   if (error) {
     return (
-      <div className="p-8 text-destructive font-mono">
+      <div className="p-8 font-mono" style={{ color: 'var(--map-dot-tram)' }}>
         Error loading data: {error}
       </div>
     )
   }
 
   return (
-    <div className="flex flex-row h-screen bg-background" onMouseMove={handleMouseMove}>
-      {/* SVG container — flex:1, full height */}
-      <div ref={svgContainerRef} className="flex-1 relative overflow-hidden">
-        {layout && svgDimensions.width > 0 && svgDimensions.height > 0 ? (
-          <RadialViz
-            layout={layout}
-            groups={groups}
-            width={svgDimensions.width}
-            height={svgDimensions.height}
-            vizPhase={vizPhase}
-            hoveredRingIndex={hoveredRingIndex}
-            hoveredStationIndex={hoveredStationIndex}
-            activeStationIndices={activeStationIndices}
-            isInteracting={hoveredStationIndex !== null || hoveredRingIndex !== null}
-            selectedStationIndex={selectedStationIndex}
-            selectedStation={selectedStation}
-            hoveredStationName={hoveredStationName}
-            isIdle={isIdle}
-            insights={insights}
-            searchMatchCount={searchMatchCount}
-            onStationEnter={handleStationEnter}
-            onStationLeave={handleStationLeave}
-            onStationSelect={handleStationSelect}
-            onDeselect={handleDeselect}
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
-            Lade Daten…
-          </div>
-        )}
-
-        {/* Info panel overlay */}
-        {infoPanelVisible ? (
-          <InfoPanel onClose={handleInfoPanelClose} />
-        ) : (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleInfoPanelOpen}
-            title="Legende anzeigen"
-            className="absolute top-4 left-4 z-10"
-          >
-            <Info size={18} />
-          </Button>
-        )}
-      </div>
-
-      {/* Right sidebar */}
-      <Sidebar
-        stations={layout ? layout.stations : []}
+    <div className="flex flex-col h-screen" style={{ background: 'var(--map-bg)' }}>
+      <NavBar
         searchQuery={searchQuery}
         onSearch={handleSearch}
-        hoveredRingIndex={hoveredRingIndex}
-        isStationHover={hoveredStationIndex !== null}
-        onRingEnter={handleRingEnter}
-        onRingLeave={handleRingLeave}
+        activeGroupKeys={activeGroupKeys}
+        onToggleGroup={handleToggleGroup}
       />
 
-      {/* Tooltip */}
-      <Tooltip station={hoveredStation} mouseX={mousePos.x} mouseY={mousePos.y} />
+      <div className="flex flex-1 overflow-hidden">
+        {/* Map column */}
+        <div ref={mapContainerRef} className="flex-1 relative overflow-hidden">
+          {svgDimensions.width > 0 && svgDimensions.height > 0 && (
+            <MapViz
+              stations={stations}
+              width={svgDimensions.width}
+              height={svgDimensions.height}
+              activeGroupKeys={dotActiveKeys}
+              hoveredIndex={hoveredIndex}
+              selectedIndex={selectedIndex}
+              onHover={handleHover}
+              onSelect={handleSelect}
+              onDeselect={handleDeselect}
+            />
+          )}
+          <InfoOverlay />
+          <MapLegend />
+        </div>
+
+        {/* Detail panel */}
+        <DetailPanel station={selectedStation} allStations={stations} />
+      </div>
     </div>
   )
 }
