@@ -39,6 +39,22 @@ describe('parseCSV', () => {
   })
 })
 
+describe('parseCSV coordinates', () => {
+  it('parses WKT POINT coordinates from shape column', () => {
+    const csv = `FID,objectid,mp_id,name,adresse,anz_stellpl_cs,anz_stellpl_taxi,anzahl_ladepunkte_ac,anzahl_ladepunkte_dc,gaf_ts_vorhanden,gaf_bs_vorhanden,gaf_ls_vorhanden,gaf_ms_vorhanden,ods_vorhanden,bus_vorhanden,tram_vorhanden,u_bahn_vorhanden,s_bahn_vorhanden,radservicestation_vorhanden,radpumpe_vorhanden,bearbeitung_datum,shape
+id1,1,101,Implerstraße,Implerstraße 36,6,Nein,0,0,Ja,Ja,Ja,Ja,Nein,Ja,Nein,Ja,Nein,Nein,Nein,20260224,"POINT (689635.4354 5332880.3286)"`
+    const stations = parseCSV(csv)
+    expect(stations[0].coords).toEqual({ x: 689635.4354, y: 5332880.3286 })
+  })
+
+  it('sets coords to null when shape is missing', () => {
+    const csv = `FID,objectid,mp_id,name,adresse,anz_stellpl_cs,anz_stellpl_taxi,anzahl_ladepunkte_ac,anzahl_ladepunkte_dc,gaf_ts_vorhanden,gaf_bs_vorhanden,gaf_ls_vorhanden,gaf_ms_vorhanden,ods_vorhanden,bus_vorhanden,tram_vorhanden,u_bahn_vorhanden,s_bahn_vorhanden,radservicestation_vorhanden,radpumpe_vorhanden,bearbeitung_datum,shape
+id1,1,101,Teststation,Teststraße 1,0,Nein,0,0,Nein,Nein,Nein,Nein,Nein,Nein,Nein,Nein,Nein,Nein,Nein,20260224,`
+    const stations = parseCSV(csv)
+    expect(stations[0].coords).toBeNull()
+  })
+})
+
 describe('groupStations', () => {
   let stations: Station[]
 
