@@ -1,34 +1,41 @@
 // src/components/NavBar.tsx
 import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { FilterChips } from './FilterChips'
 
 interface NavBarProps {
   searchQuery: string
   onSearch: (q: string) => void
-  activeGroupKeys: Set<string>
-  onToggleGroup: (key: string) => void
+  stationCount: number
+  matchCount: number
+  isFiltering: boolean
 }
 
-export function NavBar({ searchQuery, onSearch, activeGroupKeys, onToggleGroup }: NavBarProps) {
+export function NavBar({ searchQuery, onSearch, stationCount, matchCount, isFiltering }: NavBarProps) {
   return (
     <header
-      className="flex items-center gap-4 px-5 py-2.5 flex-shrink-0 border-b"
+      className="grid grid-cols-[1fr_auto_1fr] items-center px-5 py-2.5 flex-shrink-0 border-b gap-4"
       style={{ background: 'var(--map-surface)', borderColor: 'var(--map-border)' }}
     >
-      {/* Title */}
-      <span
-        className="text-[12px] font-bold uppercase tracking-[.06em] whitespace-nowrap"
-        style={{ color: 'var(--map-text-primary)' }}
-      >
-        Münchner Mobilitätspunkte
-      </span>
+      {/* Left: Title + subtitle */}
+      <div className="flex flex-col">
+        <span
+          className="text-[12px] font-bold uppercase tracking-[.06em] whitespace-nowrap"
+          style={{ color: 'var(--map-text-primary)' }}
+        >
+          Münchner Mobilitätspunkte
+        </span>
+        <span
+          className="text-[9px] whitespace-nowrap"
+          style={{ color: 'var(--map-text-dim)' }}
+        >
+          {isFiltering
+            ? `${matchCount} von ${stationCount} Stationen`
+            : `${stationCount} Stationen · 11 Dienste · Erkunde Münchens Mobilitätsnetz`}
+        </span>
+      </div>
 
-      {/* Separator */}
-      <div className="w-px h-4 flex-shrink-0" style={{ background: 'var(--map-border)' }} />
-
-      {/* Search — prominent, fixed width */}
-      <div className="relative flex-shrink-0 w-[360px]">
+      {/* Center: Search */}
+      <div className="relative w-full max-w-[360px] justify-self-center">
         <Search
           size={13}
           className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
@@ -47,10 +54,8 @@ export function NavBar({ searchQuery, onSearch, activeGroupKeys, onToggleGroup }
         />
       </div>
 
-      {/* Filter chips — pushed to right */}
-      <div className="ml-auto">
-        <FilterChips activeKeys={activeGroupKeys} onToggle={onToggleGroup} />
-      </div>
+      {/* Right: empty for balance */}
+      <div />
     </header>
   )
 }

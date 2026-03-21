@@ -24,17 +24,138 @@ function avg(nums: number[]): number {
 
 export function DetailPanel({ station, allStations }: DetailPanelProps) {
   if (!station) {
+    const totalCount = allStations.length
+    const avgServices = avg(allStations.map((s) => s.serviceCount))
+
+    // Group distribution
+    const groupOrder = ['s-bahn', 'u-bahn', 'tram', 'bus', 'none'] as const
+    const groupCounts = groupOrder.map((key) => ({
+      key,
+      label: GROUP_LABELS[key] ?? key,
+      count: allStations.filter((s) => s.groupKey === key).length,
+      color: GROUP_NEON[key] ?? '#4488aa',
+    }))
+    const maxGroupCount = Math.max(...groupCounts.map((g) => g.count), 1)
+
+    // Service frequency across all stations
+    const serviceCounts = SERVICE_DEFINITIONS.map((svc) => ({
+      ...svc,
+      count: allStations.filter((s) => s.services[svc.field] === true).length,
+    }))
+    const sortedDesc = [...serviceCounts].sort((a, b) => b.count - a.count)
+    const topServices = sortedDesc.slice(0, 3)
+    const rarestServices = sortedDesc.slice(-3).reverse()
+    const maxServiceCount = Math.max(...serviceCounts.map((s) => s.count), 1)
+
     return (
       <aside
-        className="w-[272px] flex-shrink-0 flex flex-col items-center justify-center border-l"
+        className="w-[272px] flex-shrink-0 flex flex-col overflow-y-auto border-l"
         style={{ background: 'var(--map-surface)', borderColor: 'var(--map-border)' }}
       >
-        <p
-          className="text-[11px] text-center px-6 leading-relaxed"
-          style={{ color: 'var(--map-text-dim)' }}
-        >
-          Klicke auf einen Punkt auf der Karte für Details
-        </p>
+        {/* Header */}
+        <div className="p-[18px] pb-0">
+          <h2
+            className="text-[21px] font-black leading-[1.15] tracking-[-0.025em]"
+            style={{ color: 'var(--map-text-primary)' }}
+          >
+            Überblick
+          </h2>
+        </div>
+
+        <Separator className="my-3.5 mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
+
+        {/* Total */}
+        <div className="px-[18px] pb-3.5">
+          <p className="text-[10px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>
+            Gesamt
+          </p>
+          <div className="flex items-baseline gap-1.5 mb-1">
+            <span className="text-[42px] font-black leading-none tracking-[-0.04em]" style={{ color: 'var(--map-text-primary)' }}>
+              {totalCount}
+            </span>
+            <span className="text-[13px]" style={{ color: 'var(--map-text-muted)' }}>
+              Stationen
+            </span>
+          </div>
+          <p className="text-[11px]" style={{ color: 'var(--map-text-dim)' }}>
+            Ø {avgServices.toLocaleString('de-DE', { maximumFractionDigits: 1 })} Dienste pro Station
+          </p>
+        </div>
+
+        <Separator className="mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
+
+        {/* Group distribution */}
+        <div className="px-[18px] py-4">
+          <p className="text-[10px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>
+            Nach Gruppe
+          </p>
+          {groupCounts.map(({ key, label, count, color: gColor }) => (
+            <div key={key} className="flex items-center gap-2 mb-1.5">
+              <span className="text-[10px] w-[64px] flex-shrink-0" style={{ color: gColor }}>
+                {label}
+              </span>
+              <div className="flex-1 h-1 rounded-sm" style={{ background: 'var(--map-border)' }}>
+                <div
+                  className="h-1 rounded-sm"
+                  style={{ width: `${(count / maxGroupCount) * 100}%`, background: gColor }}
+                />
+              </div>
+              <span className="text-[10px] w-6 text-right" style={{ color: 'var(--map-text-muted)' }}>
+                {count}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <Separator className="mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
+
+        {/* Top 3 most common services */}
+        <div className="px-[18px] py-4">
+          <p className="text-[10px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>
+            Häufigste Dienste
+          </p>
+          {topServices.map(({ field, label, color: sColor, count }) => (
+            <div key={field} className="flex items-center gap-2 mb-1.5">
+              <span className="text-[10px] w-[80px] flex-shrink-0 truncate" style={{ color: 'var(--map-text-muted)' }}>
+                {label}
+              </span>
+              <div className="flex-1 h-1 rounded-sm" style={{ background: 'var(--map-border)' }}>
+                <div
+                  className="h-1 rounded-sm"
+                  style={{ width: `${(count / maxServiceCount) * 100}%`, background: sColor }}
+                />
+              </div>
+              <span className="text-[10px] w-6 text-right" style={{ color: 'var(--map-text-muted)' }}>
+                {count}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <Separator className="mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
+
+        {/* Top 3 rarest services */}
+        <div className="px-[18px] py-4">
+          <p className="text-[10px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>
+            Seltenste Dienste
+          </p>
+          {rarestServices.map(({ field, label, color: sColor, count }) => (
+            <div key={field} className="flex items-center gap-2 mb-1.5">
+              <span className="text-[10px] w-[80px] flex-shrink-0 truncate" style={{ color: 'var(--map-text-muted)' }}>
+                {label}
+              </span>
+              <div className="flex-1 h-1 rounded-sm" style={{ background: 'var(--map-border)' }}>
+                <div
+                  className="h-1 rounded-sm"
+                  style={{ width: `${(count / maxServiceCount) * 100}%`, background: sColor }}
+                />
+              </div>
+              <span className="text-[10px] w-6 text-right" style={{ color: 'var(--map-text-muted)' }}>
+                {count}
+              </span>
+            </div>
+          ))}
+        </div>
       </aside>
     )
   }

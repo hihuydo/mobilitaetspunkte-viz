@@ -7,6 +7,7 @@ import { ServiceFilter } from './components/ServiceFilter'
 import { DetailPanel } from './components/DetailPanel'
 import { InfoOverlay } from './components/InfoOverlay'
 import { MapLegend } from './components/MapLegend'
+import MapTooltip from './components/MapTooltip'
 import type { MapStation } from './lib/mapLayout'
 
 export default function App() {
@@ -56,7 +57,10 @@ export default function App() {
       return next
     })
   }, [])
-  const handleResetServices = useCallback(() => setActiveServiceFields(new Set()), [])
+  const handleResetServices = useCallback(() => {
+    setActiveServiceFields(new Set())
+    setActiveGroupKeys(new Set())
+  }, [])
 
   // Hover / select
   const [hoveredIndex, setHoveredIndex]   = useState<number | null>(null)
@@ -67,6 +71,16 @@ export default function App() {
     setSelectedIndex((prev) => (prev === i ? null : i))
   }, [])
   const handleDeselect = useCallback(() => setSelectedIndex(null), [])
+
+  // Mouse position for tooltip
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    setMousePos({ x: e.clientX, y: e.clientY })
+  }, [])
+
+  // District hover
+  const [hoveredDistrict, setHoveredDistrict] = useState<string | null>(null)
+  const handleDistrictHover = useCallback((name: string | null) => setHoveredDistrict(name), [])
 
   // Esc to deselect
   useEffect(() => {
@@ -101,6 +115,11 @@ export default function App() {
       ? (stations.find((s) => s.stationIndex === selectedIndex) ?? null)
       : null
 
+  const hoveredStation: MapStation | null =
+    hoveredIndex !== null
+      ? (stations.find((s) => s.stationIndex === hoveredIndex) ?? null)
+      : null
+
   if (error) {
     return (
       <div className="p-8 font-mono" style={{ color: 'var(--map-dot-tram)' }}>
@@ -114,21 +133,29 @@ export default function App() {
       <NavBar
         searchQuery={searchQuery}
         onSearch={handleSearch}
-        activeGroupKeys={activeGroupKeys}
-        onToggleGroup={handleToggleGroup}
+        stationCount={stations.length}
+        matchCount={matchCount}
+        isFiltering={isFiltering}
       />
 
       <ServiceFilter
+        activeGroupKeys={activeGroupKeys}
+        onToggleGroup={handleToggleGroup}
         activeServices={activeServiceFields}
-        onToggle={handleToggleService}
+        onToggleService={handleToggleService}
         onReset={handleResetServices}
         matchCount={matchCount}
         totalCount={stations.length}
+        isFiltering={isFiltering}
       />
 
       <div className="flex flex-1 overflow-hidden">
         {/* Map column */}
-        <div ref={mapContainerRef} className="flex-1 relative overflow-hidden">
+        <div
+          ref={mapContainerRef}
+          className="flex-1 relative overflow-hidden"
+          onMouseMove={handleMouseMove}
+        >
           {svgDimensions.width > 0 && svgDimensions.height > 0 && (
             <MapViz
               stations={stations}
@@ -138,9 +165,11 @@ export default function App() {
               activeIndices={activeIndices}
               hoveredIndex={hoveredIndex}
               selectedIndex={selectedIndex}
+              hoveredDistrict={hoveredDistrict}
               onHover={handleHover}
               onSelect={handleSelect}
               onDeselect={handleDeselect}
+              onDistrictHover={handleDistrictHover}
             />
           )}
           <InfoOverlay />
@@ -150,6 +179,9 @@ export default function App() {
         {/* Detail panel */}
         <DetailPanel station={selectedStation} allStations={stations} />
       </div>
+
+      {/* Hover tooltip */}
+      <MapTooltip station={hoveredStation} mouseX={mousePos.x} mouseY={mousePos.y} />
     </div>
   )
 }

@@ -10,6 +10,7 @@ interface MapDotsProps {
   selectedIndex: number | null
   onHover: (index: number | null) => void
   onSelect: (index: number) => void
+  zoomScale?: number
 }
 
 export function MapDots({
@@ -20,7 +21,10 @@ export function MapDots({
   selectedIndex,
   onHover,
   onSelect,
+  zoomScale = 1,
 }: MapDotsProps) {
+  // Inverse scale so dots don't grow when zoomed in
+  const inv = 1 / zoomScale
 
   const handleMouseLeave = useCallback(() => onHover(null), [onHover])
 
@@ -40,7 +44,7 @@ export function MapDots({
             {isActive && (
               <circle
                 cx={s.sx} cy={s.sy}
-                r={s.r + (isSelected ? 7 : isHovered ? 5 : 3)}
+                r={(s.r + (isSelected ? 7 : isHovered ? 5 : 3)) * inv}
                 fill={s.color}
                 opacity={isSelected ? 0.18 : isHovered ? 0.14 : 0.08}
                 style={{ transition: 'opacity 150ms ease-out, r 150ms ease-out' }}
@@ -50,14 +54,40 @@ export function MapDots({
 
             {/* Selected outer ring accent */}
             {isSelected && (
-              <circle cx={s.sx} cy={s.sy} r={s.r + 5} fill="none" stroke={s.color} strokeWidth={1} opacity={0.3} pointerEvents="none" />
+              <circle cx={s.sx} cy={s.sy} r={(s.r + 5) * inv} fill="none" stroke={s.color} strokeWidth={inv} opacity={0.3} pointerEvents="none" />
+            )}
+
+            {/* Selected station name label */}
+            {isSelected && (
+              <g pointerEvents="none" transform={`translate(${s.sx},${s.sy}) scale(${inv}) translate(${-s.sx},${-s.sy})`}>
+                <rect
+                  x={s.sx + s.r + 8}
+                  y={s.sy - 8}
+                  width={s.name.length * 5.8 + 12}
+                  height={16}
+                  rx={3}
+                  fill="var(--map-surface)"
+                  stroke="var(--map-border)"
+                  strokeWidth={0.5}
+                  opacity={0.92}
+                />
+                <text
+                  x={s.sx + s.r + 14}
+                  y={s.sy + 3}
+                  fill="var(--map-text-primary)"
+                  fontSize={10}
+                  fontWeight={600}
+                >
+                  {s.name}
+                </text>
+              </g>
             )}
 
             {/* Station dot — sharp, no filter */}
             <circle
               cx={s.sx}
               cy={s.sy}
-              r={s.r}
+              r={s.r * inv}
               fill={s.color}
               opacity={opacity}
               style={{ cursor: 'pointer', transition: 'opacity 150ms ease-out' }}

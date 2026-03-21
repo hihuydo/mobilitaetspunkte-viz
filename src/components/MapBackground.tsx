@@ -1,7 +1,7 @@
 // src/components/MapBackground.tsx
 // Map background: Munich district outlines + decorative overlays (Isar, transit schematic).
-import { useMemo, useState, useEffect } from 'react'
-import { geoPath, geoTransform } from 'd3'
+import { useMemo, useState, useEffect, useCallback } from 'react'
+import { geoPath, geoTransform, geoCentroid } from 'd3'
 import proj4 from 'proj4'
 import type { FeatureCollection } from 'geojson'
 import districtsUrl from '../../data/munich-districts.geojson?url'
@@ -16,9 +16,11 @@ interface MapBackgroundProps {
   height: number
   cx: number
   cy: number
+  hoveredDistrict: string | null
+  onDistrictHover: (name: string | null) => void
 }
 
-export function MapBackground({ width, height, cx, cy }: MapBackgroundProps) {
+export function MapBackground({ width, height, cx, cy, hoveredDistrict, onDistrictHover }: MapBackgroundProps) {
   const [geojson, setGeojson] = useState<FeatureCollection | null>(null)
 
   useEffect(() => {
@@ -43,11 +45,17 @@ export function MapBackground({ width, height, cx, cy }: MapBackgroundProps) {
 
     const pathGen = geoPath(customProjection)
 
-    return geojson.features.map((feature) => ({
-      d: pathGen(feature) ?? '',
-      name: (feature.properties as { name: string }).name,
-    }))
+    return geojson.features.map((feature) => {
+      const name = (feature.properties as { name: string }).name
+      // Compute centroid for label placement
+      const centroid = geoCentroid(feature as GeoJSON.Feature)
+      const [cx, cy] = proj4(WGS84, EPSG25832, centroid)
+      const { sx, sy } = project(cx, cy)
+      return { d: pathGen(feature) ?? '', name, labelX: sx, labelY: sy }
+    })
   }, [geojson, width, height])
+
+  const handleDistrictLeave = useCallback(() => onDistrictHover(null), [onDistrictHover])
 
   const r1 = 92
   const r2 = 185
@@ -64,16 +72,38 @@ export function MapBackground({ width, height, cx, cy }: MapBackgroundProps) {
   return (
     <>
       {/* Munich district outlines */}
-      <g opacity={0.45}>
-        {districtPaths.map(({ d, name }) => (
-          <path
-            key={name}
-            d={d}
-            fill="none"
-            stroke="var(--map-district)"
-            strokeWidth={0.8}
-          />
-        ))}
+      <g>
+        {districtPaths.map(({ d, name, labelX, labelY }) => {
+          const isHovered = hoveredDistrict === name
+          return (
+            <g key={name}>
+              <path
+                d={d}
+                fill={isHovered ? 'rgba(255,255,255,0.03)' : 'none'}
+                stroke="var(--map-district)"
+                strokeWidth={isHovered ? 1.2 : 0.8}
+                opacity={isHovered ? 0.8 : 0.45}
+                style={{ cursor: 'pointer', transition: 'opacity 150ms, stroke-width 150ms' }}
+                onMouseEnter={() => onDistrictHover(name)}
+                onMouseLeave={handleDistrictLeave}
+              />
+              {isHovered && (
+                <text
+                  x={labelX}
+                  y={labelY}
+                  textAnchor="middle"
+                  fill="var(--map-text-muted)"
+                  fontSize={9}
+                  fontWeight={500}
+                  opacity={0.7}
+                  pointerEvents="none"
+                >
+                  {name}
+                </text>
+              )}
+            </g>
+          )
+        })}
       </g>
 
       {/* Decorative overlay: rings, roads, Isar, transit schematic */}
