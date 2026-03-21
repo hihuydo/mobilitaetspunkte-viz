@@ -137,8 +137,8 @@
 
     /* Text */
     --viz-text-primary: #c9d8e8;
-    --viz-text-muted: #4a7fa8;
-    --viz-text-dimmed: #6a94b0;
+    --viz-text-muted: #6a9ab8;
+    --viz-text-dimmed: #8aaec8;
 
     /* Interaction */
     --viz-stroke-hover: rgba(255,255,255,0.5);
@@ -167,9 +167,9 @@
     --map-bg:           #060a10;
     --map-surface:      #080d14;
     --map-border:       #1a2a3a;
-    --map-text-primary: #d0ccc8;
-    --map-text-muted:   #5a7090;
-    --map-text-dim:     #4a6080;
+    --map-text-primary: #d8d4d0;
+    --map-text-muted:   #8aacc4;
+    --map-text-dim:     #6890a8;
     --map-dot-sbahn:    #00ff88;
     --map-dot-ubahn:    #00b4ff;
     --map-dot-tram:     #ff4455;
