@@ -65,7 +65,7 @@ export function ServiceFilter({
 
   return (
     <div
-      className="flex items-center gap-2 px-3 md:px-5 py-1.5 flex-shrink-0 border-b overflow-x-auto flex-nowrap"
+      className="flex items-center gap-2 px-3 md:px-5 py-1.5 flex-shrink-0 border-b flex-nowrap relative z-20"
       style={{ background: 'var(--map-surface)', borderColor: 'var(--map-border)' }}
     >
       {/* ── Group label ─────────────────────────────────────────── */}
