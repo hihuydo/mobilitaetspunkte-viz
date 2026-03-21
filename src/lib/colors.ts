@@ -38,6 +38,21 @@ export const GROUP_LABELS: Record<GroupKey, string> = {
   'none':   'OTHER',
 }
 
+/** Hex equivalents of service colors — CSS vars don't resolve in inline SVG/tooltip styles */
+export const SERVICE_HEX: Record<string, string> = {
+  s_bahn_vorhanden:            '#00A651',
+  u_bahn_vorhanden:            '#0072BC',
+  tram_vorhanden:              '#CC0000',
+  bus_vorhanden:               '#F7941D',
+  ods_vorhanden:               '#9B59B6',
+  gaf_ts_vorhanden:            '#E91E63',
+  gaf_bs_vorhanden:            '#FFD600',
+  gaf_ls_vorhanden:            '#00BCD4',
+  gaf_ms_vorhanden:            '#FF8A65',
+  radservicestation_vorhanden: '#80CBC4',
+  radpumpe_vorhanden:          '#B0BEC5',
+}
+
 /** Fill color for absent (Nein) arc segments */
 export const ABSENT_COLOR = 'var(--viz-surface)'
 

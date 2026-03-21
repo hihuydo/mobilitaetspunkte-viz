@@ -66,11 +66,33 @@ export default function App() {
   const [hoveredIndex, setHoveredIndex]   = useState<number | null>(null)
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
 
+  // Restore selection from URL on mount (after stations load)
+  useEffect(() => {
+    if (stations.length === 0) return
+    const params = new URLSearchParams(window.location.search)
+    const name = params.get('station')
+    if (!name) return
+    const match = stations.find((s) => s.name.toLowerCase() === name.toLowerCase())
+    if (match) setSelectedIndex(match.stationIndex)
+  }, [stations])
+
   const handleHover    = useCallback((i: number | null) => setHoveredIndex(i), [])
   const handleSelect   = useCallback((i: number) => {
-    setSelectedIndex((prev) => (prev === i ? null : i))
+    setSelectedIndex((prev) => {
+      const next = prev === i ? null : i
+      const station = stations.find((s) => s.stationIndex === i)
+      if (next !== null && station) {
+        window.history.replaceState(null, '', `?station=${encodeURIComponent(station.name)}`)
+      } else {
+        window.history.replaceState(null, '', window.location.pathname)
+      }
+      return next
+    })
+  }, [stations])
+  const handleDeselect = useCallback(() => {
+    setSelectedIndex(null)
+    window.history.replaceState(null, '', window.location.pathname)
   }, [])
-  const handleDeselect = useCallback(() => setSelectedIndex(null), [])
 
   // Mouse position for tooltip
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
@@ -110,6 +132,14 @@ export default function App() {
 
   const matchCount = isFiltering ? activeIndices.size : stations.length
 
+  const groupCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const s of stations) {
+      counts[s.groupKey] = (counts[s.groupKey] ?? 0) + 1
+    }
+    return counts
+  }, [stations])
+
   const selectedStation: MapStation | null =
     selectedIndex !== null
       ? (stations.find((s) => s.stationIndex === selectedIndex) ?? null)
@@ -147,6 +177,7 @@ export default function App() {
         matchCount={matchCount}
         totalCount={stations.length}
         isFiltering={isFiltering}
+        groupCounts={groupCounts}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -174,10 +205,32 @@ export default function App() {
           )}
           <InfoOverlay />
           <MapLegend />
+          {isFiltering && activeIndices.size === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+              <div
+                className="flex flex-col items-center gap-2 p-5 rounded-xl border text-center pointer-events-auto"
+                style={{ background: 'var(--map-surface)', borderColor: 'var(--map-border)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
+              >
+                <p className="text-[13px] font-semibold" style={{ color: 'var(--map-text-primary)' }}>
+                  Keine Stationen gefunden
+                </p>
+                <p className="text-[11px]" style={{ color: 'var(--map-text-dim)' }}>
+                  Filterkombination ergibt keine Treffer
+                </p>
+                <button
+                  onClick={handleResetServices}
+                  className="mt-1 text-[10px] px-3 py-1 rounded border transition-colors"
+                  style={{ borderColor: 'var(--map-border)', color: 'var(--map-text-muted)' }}
+                >
+                  Filter zurücksetzen
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Detail panel */}
-        <DetailPanel station={selectedStation} allStations={stations} onClose={handleDeselect} />
+        <DetailPanel station={selectedStation} allStations={stations} onClose={handleDeselect} onFilterService={handleToggleService} />
       </div>
 
       {/* Hover tooltip */}

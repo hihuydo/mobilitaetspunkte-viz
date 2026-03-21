@@ -45,13 +45,21 @@ export function NavBar({ searchQuery, onSearch, stationCount, matchCount, isFilt
           value={searchQuery}
           onChange={(e) => onSearch(e.target.value)}
           placeholder="Station suchen…"
-          className="pl-8 text-[12px] h-8 rounded-lg border focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="pl-8 pr-12 text-[12px] h-8 rounded-lg border focus-visible:ring-0 focus-visible:ring-offset-0"
           style={{
             background: '#0b1018',
             borderColor: 'var(--map-border)',
             color: 'var(--map-text-primary)',
           }}
         />
+        {searchQuery !== '' && (
+          <span
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] tabular-nums pointer-events-none"
+            style={{ color: 'var(--map-text-dim)' }}
+          >
+            {matchCount}
+          </span>
+        )}
       </div>
 
       {/* Right: empty for balance (desktop only) */}

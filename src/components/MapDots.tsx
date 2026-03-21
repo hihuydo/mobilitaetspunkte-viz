@@ -52,9 +52,12 @@ export function MapDots({
               />
             )}
 
-            {/* Selected outer ring accent */}
+            {/* Selected outer ring accent — stronger than hover */}
             {isSelected && (
-              <circle cx={s.sx} cy={s.sy} r={(s.r + 5) * inv} fill="none" stroke={s.color} strokeWidth={inv} opacity={0.3} pointerEvents="none" />
+              <>
+                <circle cx={s.sx} cy={s.sy} r={(s.r + 5) * inv} fill="none" stroke={s.color} strokeWidth={1.5 * inv} opacity={0.6} pointerEvents="none" />
+                <circle cx={s.sx} cy={s.sy} r={(s.r + 2) * inv} fill="none" stroke="white" strokeWidth={0.8 * inv} opacity={0.35} pointerEvents="none" />
+              </>
             )}
 
             {/* Selected station name label */}

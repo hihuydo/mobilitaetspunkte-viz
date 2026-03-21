@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom'
 import type { MapStation } from '../lib/mapLayout'
 import { GROUP_NEON } from '../lib/mapLayout'
+import { SERVICE_DEFINITIONS, SERVICE_HEX } from '../lib/colors'
 
 interface MapTooltipProps {
   station: MapStation | null
@@ -10,7 +11,7 @@ interface MapTooltipProps {
 
 const OFFSET = 12
 const TOOLTIP_W = 200
-const TOOLTIP_H = 60
+const TOOLTIP_H = 90
 
 const isTouchDevice = typeof window !== 'undefined' && 'ontouchstart' in window
 
@@ -71,6 +72,21 @@ export default function MapTooltip({ station, mouseX, mouseY }: MapTooltipProps)
         }}
       >
         {station.serviceCount} von 11 Diensten
+      </div>
+      <div style={{ display: 'flex', gap: 4, paddingLeft: 14, marginTop: 6, flexWrap: 'wrap' }}>
+        {SERVICE_DEFINITIONS.filter((svc) => station.services[svc.field]).map((svc) => (
+          <span
+            key={svc.field}
+            title={svc.label}
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              background: SERVICE_HEX[svc.field] ?? '#888',
+              flexShrink: 0,
+            }}
+          />
+        ))}
       </div>
     </div>,
     document.body,

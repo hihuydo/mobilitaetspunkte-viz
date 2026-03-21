@@ -1,11 +1,12 @@
 // src/components/MapBackground.tsx
 // Map background: Munich district outlines + decorative overlays (Isar, transit schematic).
 import { useMemo, useState, useEffect, useCallback } from 'react'
-import { geoPath, geoTransform, geoCentroid } from 'd3'
+import { geoPath, geoTransform, geoCentroid, geoContains } from 'd3'
 import proj4 from 'proj4'
 import type { FeatureCollection } from 'geojson'
 import districtsUrl from '../../data/munich-districts.geojson?url'
 import { createProjection } from '../lib/mapProjection'
+import type { MapStation } from '../lib/mapLayout'
 
 // Coordinate system definitions
 const WGS84 = '+proj=longlat +datum=WGS84 +no_defs'
@@ -18,9 +19,10 @@ interface MapBackgroundProps {
   cy: number
   hoveredDistrict: string | null
   onDistrictHover: (name: string | null) => void
+  stations: MapStation[]
 }
 
-export function MapBackground({ width, height, cx, cy, hoveredDistrict, onDistrictHover }: MapBackgroundProps) {
+export function MapBackground({ width, height, cx, cy, hoveredDistrict, onDistrictHover, stations }: MapBackgroundProps) {
   const [geojson, setGeojson] = useState<FeatureCollection | null>(null)
 
   useEffect(() => {
@@ -51,9 +53,18 @@ export function MapBackground({ width, height, cx, cy, hoveredDistrict, onDistri
       const centroid = geoCentroid(feature as GeoJSON.Feature)
       const [cx, cy] = proj4(WGS84, EPSG25832, centroid)
       const { sx, sy } = project(cx, cy)
-      return { d: pathGen(feature) ?? '', name, labelX: sx, labelY: sy }
+      return { d: pathGen(feature) ?? '', name, labelX: sx, labelY: sy, feature }
     })
   }, [geojson, width, height])
+
+  // Station count per district (computed once per geojson+stations change)
+  const districtCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const { name, feature } of districtPaths) {
+      counts[name] = stations.filter((s) => geoContains(feature as GeoJSON.Feature, s.lonlat)).length
+    }
+    return counts
+  }, [districtPaths, stations])
 
   const handleDistrictLeave = useCallback(() => onDistrictHover(null), [onDistrictHover])
 
@@ -67,7 +78,15 @@ export function MapBackground({ width, height, cx, cy, hoveredDistrict, onDistri
     [cx - 345, cy],       [cx + 345, cy],
   ]
 
-  const isarD = `M ${cx + 80} ${cy - 242} Q ${cx + 96} ${cy - 140} Q ${cx + 92} ${cy - 67} Q ${cx + 88} ${cy} Q ${cx + 102} ${cy + 76} Q ${cx + 112} ${cy + 138} Q ${cx + 108} ${cy + 244}`
+  // Isar river path — quadratic Bézier segments (Q controlX controlY endX endY)
+  const isarD = [
+    `M ${cx + 80} ${cy - 242}`,
+    `Q ${cx + 96} ${cy - 140} ${cx + 92} ${cy - 67}`,
+    `Q ${cx + 88} ${cy + 10} ${cx + 88} ${cy}`,
+    `Q ${cx + 95} ${cy + 40} ${cx + 102} ${cy + 76}`,
+    `Q ${cx + 108} ${cy + 110} ${cx + 112} ${cy + 138}`,
+    `Q ${cx + 110} ${cy + 190} ${cx + 108} ${cy + 244}`,
+  ].join(' ')
 
   return (
     <>
@@ -98,7 +117,7 @@ export function MapBackground({ width, height, cx, cy, hoveredDistrict, onDistri
                   opacity={0.7}
                   pointerEvents="none"
                 >
-                  {name}
+                  {name} · {districtCounts[name] ?? 0}
                 </text>
               )}
             </g>

@@ -1,8 +1,9 @@
 // src/components/ServiceFilter.tsx
-import { X } from 'lucide-react'
-import { SERVICE_DEFINITIONS } from '../lib/colors'
+import { useState, useEffect, useRef } from 'react'
+import { X, ChevronDown, ChevronUp } from 'lucide-react'
+import { SERVICE_DEFINITIONS, SERVICE_HEX } from '../lib/colors'
 
-/* ── Group chips (from former FilterChips.tsx) ────────────────────── */
+/* ── Group chips ────────────────────────────────────────────────── */
 
 interface GroupChip {
   key: string
@@ -20,22 +21,6 @@ const GROUP_CHIPS: GroupChip[] = [
   { key: 'none',   label: 'Sonstige', color: '#4488aa', bgColor: '#4488aa18', borderColor: '#4488aa40' },
 ]
 
-/* ── Service chip hex colors (CSS vars don't work in inline SVG) ── */
-
-const SERVICE_HEX: Record<string, string> = {
-  s_bahn_vorhanden: '#00A651',
-  u_bahn_vorhanden: '#0072BC',
-  tram_vorhanden: '#CC0000',
-  bus_vorhanden: '#F7941D',
-  ods_vorhanden: '#9B59B6',
-  gaf_ts_vorhanden: '#E91E63',
-  gaf_bs_vorhanden: '#FFD600',
-  gaf_ls_vorhanden: '#00BCD4',
-  gaf_ms_vorhanden: '#FF8A65',
-  radservicestation_vorhanden: '#80CBC4',
-  radpumpe_vorhanden: '#B0BEC5',
-}
-
 /* ── Props ─────────────────────────────────────────────────────── */
 
 interface ServiceFilterProps {
@@ -47,6 +32,7 @@ interface ServiceFilterProps {
   matchCount: number
   totalCount: number
   isFiltering: boolean
+  groupCounts?: Record<string, number>
 }
 
 /* ── Component ─────────────────────────────────────────────────── */
@@ -60,13 +46,29 @@ export function ServiceFilter({
   matchCount,
   totalCount,
   isFiltering,
+  groupCounts,
 }: ServiceFilterProps) {
+  const [showServices, setShowServices] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!showServices) return
+    const onMouseDown = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowServices(false)
+      }
+    }
+    document.addEventListener('mousedown', onMouseDown)
+    return () => document.removeEventListener('mousedown', onMouseDown)
+  }, [showServices])
+
   return (
     <div
       className="flex items-center gap-2 px-3 md:px-5 py-1.5 flex-shrink-0 border-b overflow-x-auto flex-nowrap"
       style={{ background: 'var(--map-surface)', borderColor: 'var(--map-border)' }}
     >
-      {/* ── Group chips ─────────────────────────────────────────── */}
+      {/* ── Group label ─────────────────────────────────────────── */}
       <span
         className="text-[9px] uppercase tracking-widest whitespace-nowrap"
         style={{ color: 'var(--map-text-dim)' }}
@@ -74,10 +76,12 @@ export function ServiceFilter({
         Gruppe
       </span>
 
+      {/* ── Group chips ─────────────────────────────────────────── */}
       <div className="flex items-center gap-1">
         {GROUP_CHIPS.map((chip) => {
           const isActive = activeGroupKeys.has(chip.key)
           const noneActive = activeGroupKeys.size === 0
+          const count = groupCounts?.[chip.key] ?? 0
 
           const style = isActive
             ? { background: chip.bgColor, color: chip.color, borderColor: chip.borderColor }
@@ -89,10 +93,13 @@ export function ServiceFilter({
             <button
               key={chip.key}
               onClick={() => onToggleGroup(chip.key)}
-              className="text-[10px] tracking-wide px-2.5 py-0.5 rounded-full border whitespace-nowrap transition-colors"
+              className="flex items-center gap-1 text-[10px] tracking-wide px-2.5 py-0.5 rounded-full border whitespace-nowrap transition-colors"
               style={style}
             >
               {chip.label}
+              {groupCounts && (
+                <span className="text-[9px] opacity-60">({count})</span>
+              )}
             </button>
           )
         })}
@@ -101,38 +108,67 @@ export function ServiceFilter({
       {/* ── Separator ───────────────────────────────────────────── */}
       <div className="w-px h-4 flex-shrink-0" style={{ background: 'var(--map-border)' }} />
 
-      {/* ── Service chips ───────────────────────────────────────── */}
-      <span
-        className="text-[9px] uppercase tracking-widest whitespace-nowrap"
-        style={{ color: 'var(--map-text-dim)' }}
-      >
-        Dienste
-      </span>
-
-      <div className="flex items-center gap-1 flex-nowrap">
-        {SERVICE_DEFINITIONS.map((svc) => {
-          const isActive = activeServices.has(svc.field)
-          const hex = SERVICE_HEX[svc.field] ?? '#888'
-
-          return (
-            <button
-              key={svc.field}
-              onClick={() => onToggleService(svc.field)}
-              className="flex items-center gap-1 text-[10px] tracking-wide px-2 py-0.5 rounded-full border whitespace-nowrap transition-all"
-              style={
-                isActive
-                  ? { background: `${hex}18`, color: hex, borderColor: `${hex}40` }
-                  : { background: 'transparent', color: 'var(--map-text-muted)', borderColor: 'var(--map-border)' }
-              }
+      {/* ── Dienste dropdown toggle ──────────────────────────────── */}
+      <div className="relative flex-shrink-0" ref={dropdownRef}>
+        <button
+          onClick={() => setShowServices((v) => !v)}
+          className="flex items-center gap-1 text-[10px] tracking-wide px-2.5 py-0.5 rounded-full border whitespace-nowrap transition-colors"
+          style={
+            activeServices.size > 0
+              ? { background: '#ffffff10', color: 'var(--map-text-primary)', borderColor: 'var(--map-border)' }
+              : { background: 'transparent', color: 'var(--map-text-muted)', borderColor: 'var(--map-border)' }
+          }
+        >
+          <span className="text-[9px] uppercase tracking-widest" style={{ color: 'var(--map-text-dim)' }}>
+            Dienste
+          </span>
+          {activeServices.size > 0 && (
+            <span
+              className="flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold"
+              style={{ background: '#ffffff20', color: 'var(--map-text-primary)' }}
             >
-              <span
-                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                style={{ background: isActive ? hex : 'var(--map-text-dim)' }}
-              />
-              {svc.label}
-            </button>
-          )
-        })}
+              {activeServices.size}
+            </span>
+          )}
+          {showServices ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+        </button>
+
+        {/* ── Service chip dropdown ───────────────────────────────── */}
+        {showServices && (
+          <div
+            className="absolute top-full left-0 mt-1 z-50 p-2 rounded-lg border flex flex-wrap gap-1"
+            style={{
+              background: 'var(--map-surface)',
+              borderColor: 'var(--map-border)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              minWidth: 280,
+            }}
+          >
+            {SERVICE_DEFINITIONS.map((svc) => {
+              const isActive = activeServices.has(svc.field)
+              const hex = SERVICE_HEX[svc.field] ?? '#888'
+
+              return (
+                <button
+                  key={svc.field}
+                  onClick={() => onToggleService(svc.field)}
+                  className="flex items-center gap-1 text-[10px] tracking-wide px-2 py-0.5 rounded-full border whitespace-nowrap transition-all"
+                  style={
+                    isActive
+                      ? { background: `${hex}18`, color: hex, borderColor: `${hex}40` }
+                      : { background: 'transparent', color: 'var(--map-text-muted)', borderColor: 'var(--map-border)' }
+                  }
+                >
+                  <span
+                    className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                    style={{ background: isActive ? hex : 'var(--map-text-dim)' }}
+                  />
+                  {svc.label}
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* ── Spacer ──────────────────────────────────────────────── */}

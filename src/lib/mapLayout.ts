@@ -1,7 +1,11 @@
 import { scaleSqrt } from 'd3'
+import proj4 from 'proj4'
 import type { Station } from './parseData'
 import { SERVICE_DEFINITIONS } from './colors'
 import { createProjection } from './mapProjection'
+
+const WGS84 = '+proj=longlat +datum=WGS84 +no_defs'
+const EPSG25832 = '+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
 
 export const DOT_MIN_R = 4
 export const DOT_MAX_R = 16
@@ -18,6 +22,7 @@ export interface MapStation {
   sy: number
   r: number
   color: string
+  lonlat: [number, number]
 }
 
 /** Neon hex values for SVG fills — CSS vars can't be used inside SVG filter references */
@@ -58,6 +63,7 @@ export function computeMapLayout(
     .map((s, i): MapStation | null => {
       if (!s.coords) return null
       const { sx, sy } = project(s.coords.x, s.coords.y)
+      const [lon, lat] = proj4(EPSG25832, WGS84, [s.coords.x, s.coords.y])
       const serviceCount = SERVICE_FIELDS.filter((f) => s.services[f]).length
       const groupKey = getGroupKey(s.services)
       return {
@@ -72,6 +78,7 @@ export function computeMapLayout(
         sy,
         r: sizeScale(serviceCount),
         color: GROUP_NEON[groupKey] ?? GROUP_NEON['none'],
+        lonlat: [lon, lat] as [number, number],
       }
     })
     .filter((s): s is MapStation => s !== null)

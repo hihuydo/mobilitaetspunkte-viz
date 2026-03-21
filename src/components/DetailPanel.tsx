@@ -10,6 +10,7 @@ interface DetailPanelProps {
   station: MapStation | null
   allStations: MapStation[]
   onClose?: () => void
+  onFilterService?: (field: string) => void
 }
 
 const GROUP_LABELS: Record<string, string> = {
@@ -26,7 +27,7 @@ function avg(nums: number[]): number {
 
 /* ── Idle overview (no station selected) ───────────────────────── */
 
-function IdleContent({ allStations }: { allStations: MapStation[] }) {
+function IdleContent({ allStations, onFilterService }: { allStations: MapStation[]; onFilterService?: (field: string) => void }) {
   const totalCount = allStations.length
   const avgServices = avg(allStations.map((s) => s.serviceCount))
 
@@ -94,7 +95,17 @@ function IdleContent({ allStations }: { allStations: MapStation[] }) {
             <div className="flex-1 h-1 rounded-sm" style={{ background: 'var(--map-border)' }}>
               <div className="h-1 rounded-sm" style={{ width: `${(count / maxServiceCount) * 100}%`, background: sColor }} />
             </div>
-            <span className="text-[10px] w-6 text-right" style={{ color: 'var(--map-text-muted)' }}>{count}</span>
+            <span className="text-[10px] w-6 text-right tabular-nums" style={{ color: 'var(--map-text-muted)' }}>{count}</span>
+            {onFilterService && (
+              <button
+                onClick={() => onFilterService(field)}
+                className="text-[9px] px-1.5 py-0.5 rounded border flex-shrink-0 transition-colors"
+                style={{ borderColor: 'var(--map-border)', color: 'var(--map-text-dim)' }}
+                title={`Nur ${label} anzeigen`}
+              >
+                →
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -109,7 +120,17 @@ function IdleContent({ allStations }: { allStations: MapStation[] }) {
             <div className="flex-1 h-1 rounded-sm" style={{ background: 'var(--map-border)' }}>
               <div className="h-1 rounded-sm" style={{ width: `${(count / maxServiceCount) * 100}%`, background: sColor }} />
             </div>
-            <span className="text-[10px] w-6 text-right" style={{ color: 'var(--map-text-muted)' }}>{count}</span>
+            <span className="text-[10px] w-6 text-right tabular-nums" style={{ color: 'var(--map-text-muted)' }}>{count}</span>
+            {onFilterService && (
+              <button
+                onClick={() => onFilterService(field)}
+                className="text-[9px] px-1.5 py-0.5 rounded border flex-shrink-0 transition-colors"
+                style={{ borderColor: 'var(--map-border)', color: 'var(--map-text-dim)' }}
+                title={`Nur ${label} anzeigen`}
+              >
+                →
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -201,14 +222,14 @@ function StationContent({ station, allStations }: { station: MapStation; allStat
 
 /* ── Main export ───────────────────────────────────────────────── */
 
-export function DetailPanel({ station, allStations, onClose }: DetailPanelProps) {
+export function DetailPanel({ station, allStations, onClose, onFilterService }: DetailPanelProps) {
   // Desktop sidebar (idle overview)
   const desktopIdle = (
     <aside
       className="hidden md:flex w-[272px] flex-shrink-0 flex-col overflow-y-auto border-l"
       style={{ background: 'var(--map-surface)', borderColor: 'var(--map-border)' }}
     >
-      <IdleContent allStations={allStations} />
+      <IdleContent allStations={allStations} onFilterService={onFilterService} />
     </aside>
   )
 

@@ -110,7 +110,7 @@ export function MapViz({
         </defs>
 
         <g ref={gRef} transform={`translate(${transform.x},${transform.y}) scale(${transform.k})`}>
-          <MapBackground width={width} height={height} cx={cx} cy={cy} hoveredDistrict={hoveredDistrict} onDistrictHover={onDistrictHover} />
+          <MapBackground width={width} height={height} cx={cx} cy={cy} hoveredDistrict={hoveredDistrict} onDistrictHover={onDistrictHover} stations={stations} />
           <MapDots
             stations={stations}
             isFiltering={isFiltering}
@@ -125,7 +125,7 @@ export function MapViz({
       </svg>
 
       {/* Zoom controls — larger touch targets on mobile */}
-      <div className="absolute bottom-16 right-3 md:right-4 flex flex-col gap-1 z-10">
+      <div className="absolute top-3 right-3 md:right-4 flex flex-col gap-1 z-10">
         <button
           onClick={handleZoomIn}
           className="w-9 h-9 md:w-7 md:h-7 flex items-center justify-center rounded border text-sm md:text-xs font-bold"
