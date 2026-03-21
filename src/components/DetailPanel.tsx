@@ -18,7 +18,7 @@ const GROUP_LABELS: Record<string, string> = {
   'u-bahn': 'U-BAHN',
   'tram':   'TRAM',
   'bus':    'BUS',
-  'none':   'SONSTIGE',
+  'none':   'KEIN ÖPNV',
 }
 
 function avg(nums: number[]): number {

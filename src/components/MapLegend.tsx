@@ -6,7 +6,7 @@ const GROUP_ITEMS = [
   { key: 'u-bahn', label: 'U-Bahn' },
   { key: 'tram',   label: 'Tram' },
   { key: 'bus',    label: 'Bus' },
-  { key: 'none',   label: 'Sonstige' },
+  { key: 'none',   label: 'Kein ÖPNV' },
 ]
 
 export function MapLegend() {

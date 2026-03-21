@@ -18,7 +18,7 @@ const GROUP_CHIPS: GroupChip[] = [
   { key: 'u-bahn', label: 'U-Bahn',   color: '#00b4ff', bgColor: '#00b4ff18', borderColor: '#00b4ff40' },
   { key: 'tram',   label: 'Tram',     color: '#ff4455', bgColor: '#ff445518', borderColor: '#ff445540' },
   { key: 'bus',    label: 'Bus',      color: '#ffd700', bgColor: '#ffd70018', borderColor: '#ffd70040' },
-  { key: 'none',   label: 'Sonstige', color: '#4488aa', bgColor: '#4488aa18', borderColor: '#4488aa40' },
+  { key: 'none',   label: 'Kein ÖPNV', color: '#4488aa', bgColor: '#4488aa18', borderColor: '#4488aa40' },
 ]
 
 /* ── Props ─────────────────────────────────────────────────────── */
