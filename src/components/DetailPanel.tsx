@@ -163,7 +163,26 @@ function StationContent({ station, allStations }: { station: MapStation; allStat
 
       <Separator className="my-3.5 mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
 
-      <div className="px-[18px] pb-3.5">
+      <div className="px-[18px] py-4">
+        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Alle Mobilitätsangebote</p>
+        <div className="grid grid-cols-2 gap-1">
+          {SERVICE_DEFINITIONS.map((svc) => {
+            const present = station.services[svc.field] === true
+            return (
+              <div key={svc.field} className="flex items-center gap-1.5 px-1.5 py-1 rounded"
+                style={{ background: present ? '#0b1420' : 'transparent', opacity: present ? 1 : 0.22 }}>
+                <div className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  style={{ background: present ? svc.color : 'var(--map-border)', boxShadow: present ? `0 0 3px ${svc.color}33` : 'none' }} />
+                <span className="text-[12px]" style={{ color: 'var(--map-text-primary)' }}>{svc.label}</span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      <Separator className="mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
+
+      <div className="px-[18px] pb-3.5 pt-4">
         <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Mobilitätsangebote im Vergleich</p>
         <div className="flex items-baseline gap-1.5 mb-3">
           <span className="text-[42px] font-black leading-none tracking-[-0.04em]" style={{ color }}>{station.serviceCount}</span>
@@ -196,25 +215,6 @@ function StationContent({ station, allStations }: { station: MapStation; allStat
             )}
           </div>
         )}
-      </div>
-
-      <Separator className="mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
-
-      <div className="px-[18px] py-4">
-        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Alle Mobilitätsangebote</p>
-        <div className="grid grid-cols-2 gap-1">
-          {SERVICE_DEFINITIONS.map((svc) => {
-            const present = station.services[svc.field] === true
-            return (
-              <div key={svc.field} className="flex items-center gap-1.5 px-1.5 py-1 rounded"
-                style={{ background: present ? '#0b1420' : 'transparent', opacity: present ? 1 : 0.22 }}>
-                <div className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                  style={{ background: present ? svc.color : 'var(--map-border)', boxShadow: present ? `0 0 3px ${svc.color}33` : 'none' }} />
-                <span className="text-[12px]" style={{ color: 'var(--map-text-primary)' }}>{svc.label}</span>
-              </div>
-            )
-          })}
-        </div>
       </div>
     </>
   )
