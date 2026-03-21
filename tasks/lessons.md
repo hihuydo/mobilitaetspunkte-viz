@@ -30,8 +30,15 @@
 - No SVG `<filter>` needed → no filter region issues, no performance cost
 - Transition `r` and `opacity` on the glow ring for smooth hover/select states
 
+## Filter Architecture
+
+- Unified filter in App.tsx: compute `activeIndices: Set<number>` from all filters combined
+- MapDots receives `isFiltering` + `activeIndices` — stays dumb, only dims/brightens
+- AND-Logik für Dienst-Filter: `[...activeServiceFields].every(f => s.services[f])`
+- Gruppen-Filter + Suche + Dienst-Filter kombinierbar in einem `useMemo`
+- Service-Chip-Farben als Hex-Map in ServiceFilter.tsx (CSS vars unzuverlässig in inline styles)
+
 ## Worktree
 
-- Branch: `feature/map-viz` at `.worktrees/map-viz`
-- Main project: `/Users/huydo/.../mobilitaetspunkte-viz`
-- Dev server last ran on port 5177 (5174–5176 were in use)
+- Branch: `feature/map-viz` at `.worktrees/map-viz` (merged to main)
+- Dev server: ports 5173–5177 oft belegt, aktuell 5178

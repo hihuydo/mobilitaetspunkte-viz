@@ -1,16 +1,19 @@
 # Mobilitätspunkte Viz — Todo
 
-## Status: feature/map-viz branch — ready to merge
+## Status: main — Karten-Viz mit Service-Filtern
 
-## Done (this session)
-- [x] Full map viz implementation (Tasks 1–16): parseData, mapProjection, mapLayout, CSS tokens, all components, useMapData, App.tsx rewrite, delete legacy radial viz
-- [x] Replaced SVG blur filter on dots → glow-ring (semi-transparent circle, no feGaussianBlur)
-- [x] Munich Stadtbezirke outlines as map background (25 districts from Overpass API, proj4 projection alignment)
-- [x] District outline opacity tuned to 0.45
+## Done
+- [x] Full radial viz (legacy, replaced by map)
+- [x] Map viz: parseData, mapProjection, mapLayout, CSS tokens, all components
+- [x] Munich Stadtbezirke outlines as map background
+- [x] Merge feature/map-viz → main
+- [x] Service-Filter (11 Dienst-Chips mit AND-Logik, Counter, Reset)
+- [x] Unified filter pipeline (Gruppe + Suche + Dienste kombiniert)
+- [x] Fix: @types/geojson + proj4 type declarations for clean build
 
-## Next (new session)
-- [ ] Task 17: Final interaction verification (hover, select, filter chips, search, Esc, detail panel)
-- [ ] Task 18: Deploy to Vercel (pnpm build confirmed clean)
-- [ ] Merge feature/map-viz → main
-- [ ] Consider: tooltip with district name on hover
+## Next
+- [ ] Deploy to Vercel (pnpm build confirmed clean)
+- [ ] Consider: tooltip with station name on hover
 - [ ] Consider: mobile layout / responsive breakpoints
+- [ ] Consider: Bezirks-Aggregation (Choropleth nach Versorgungsgrad)
+- [ ] Consider: Vergleichs-/Ranking-Ansicht (sortierbare Liste)

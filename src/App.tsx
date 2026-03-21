@@ -1,8 +1,9 @@
 // src/App.tsx
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useMapData } from './hooks/useMapData'
 import { MapViz } from './components/MapViz'
 import { NavBar } from './components/NavBar'
+import { ServiceFilter } from './components/ServiceFilter'
 import { DetailPanel } from './components/DetailPanel'
 import { InfoOverlay } from './components/InfoOverlay'
 import { MapLegend } from './components/MapLegend'
@@ -45,6 +46,18 @@ export default function App() {
     })
   }, [])
 
+  // Service filter (AND logic: station must have ALL selected services)
+  const [activeServiceFields, setActiveServiceFields] = useState<Set<string>>(new Set())
+  const handleToggleService = useCallback((field: string) => {
+    setActiveServiceFields((prev) => {
+      const next = new Set(prev)
+      if (next.has(field)) next.delete(field)
+      else next.add(field)
+      return next
+    })
+  }, [])
+  const handleResetServices = useCallback(() => setActiveServiceFields(new Set()), [])
+
   // Hover / select
   const [hoveredIndex, setHoveredIndex]   = useState<number | null>(null)
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
@@ -62,23 +75,26 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // When searching, build a synthetic activeGroupKeys from matching stations only.
-  // MapDots dims stations whose groupKey is NOT in activeGroupKeys — so we
-  // populate it with only the groups that have search matches.
-  const dotActiveKeys: Set<string> = (() => {
-    if (searchQuery === '') return activeGroupKeys
+  // Unified filter: group + search + service → active station indices
+  const isFiltering = activeGroupKeys.size > 0 || searchQuery !== '' || activeServiceFields.size > 0
+
+  const activeIndices: Set<number> = useMemo(() => {
+    if (!isFiltering) return new Set<number>()
     const searchLower = searchQuery.toLowerCase()
-    const matchingGroups = new Set(
-      stations
-        .filter((s) => {
-          const matchesGroup = activeGroupKeys.size === 0 || activeGroupKeys.has(s.groupKey)
-          return matchesGroup && s.name.toLowerCase().includes(searchLower)
-        })
-        .map((s) => s.groupKey)
-    )
-    // If nothing matches, return a non-empty set with a dummy key so all dots dim
-    return matchingGroups.size > 0 ? matchingGroups : new Set(['__none__'])
-  })()
+    const result = new Set<number>()
+    for (const s of stations) {
+      const matchesGroup = activeGroupKeys.size === 0 || activeGroupKeys.has(s.groupKey)
+      const matchesSearch = searchQuery === '' || s.name.toLowerCase().includes(searchLower)
+      const matchesServices = activeServiceFields.size === 0 ||
+        [...activeServiceFields].every((field) => s.services[field])
+      if (matchesGroup && matchesSearch && matchesServices) {
+        result.add(s.stationIndex)
+      }
+    }
+    return result
+  }, [stations, activeGroupKeys, searchQuery, activeServiceFields, isFiltering])
+
+  const matchCount = isFiltering ? activeIndices.size : stations.length
 
   const selectedStation: MapStation | null =
     selectedIndex !== null
@@ -102,6 +118,14 @@ export default function App() {
         onToggleGroup={handleToggleGroup}
       />
 
+      <ServiceFilter
+        activeServices={activeServiceFields}
+        onToggle={handleToggleService}
+        onReset={handleResetServices}
+        matchCount={matchCount}
+        totalCount={stations.length}
+      />
+
       <div className="flex flex-1 overflow-hidden">
         {/* Map column */}
         <div ref={mapContainerRef} className="flex-1 relative overflow-hidden">
@@ -110,7 +134,8 @@ export default function App() {
               stations={stations}
               width={svgDimensions.width}
               height={svgDimensions.height}
-              activeGroupKeys={dotActiveKeys}
+              isFiltering={isFiltering}
+              activeIndices={activeIndices}
               hoveredIndex={hoveredIndex}
               selectedIndex={selectedIndex}
               onHover={handleHover}

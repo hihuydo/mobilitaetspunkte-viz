@@ -4,7 +4,8 @@ import type { MapStation } from '../lib/mapLayout'
 
 interface MapDotsProps {
   stations: MapStation[]
-  activeGroupKeys: Set<string>
+  isFiltering: boolean
+  activeIndices: Set<number>
   hoveredIndex: number | null
   selectedIndex: number | null
   onHover: (index: number | null) => void
@@ -13,13 +14,13 @@ interface MapDotsProps {
 
 export function MapDots({
   stations,
-  activeGroupKeys,
+  isFiltering,
+  activeIndices,
   hoveredIndex,
   selectedIndex,
   onHover,
   onSelect,
 }: MapDotsProps) {
-  const isFiltering = activeGroupKeys.size > 0
 
   const handleMouseLeave = useCallback(() => onHover(null), [onHover])
 
@@ -28,7 +29,7 @@ export function MapDots({
       {stations.map((s) => {
         const isSelected = s.stationIndex === selectedIndex
         const isHovered  = s.stationIndex === hoveredIndex
-        const isActive   = !isFiltering || activeGroupKeys.has(s.groupKey)
+        const isActive   = !isFiltering || activeIndices.has(s.stationIndex)
 
         let opacity = isActive ? 0.88 : 0.12
         if (isSelected || isHovered) opacity = 1

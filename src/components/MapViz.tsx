@@ -7,7 +7,8 @@ interface MapVizProps {
   stations: MapStation[]
   width: number
   height: number
-  activeGroupKeys: Set<string>
+  isFiltering: boolean
+  activeIndices: Set<number>
   hoveredIndex: number | null
   selectedIndex: number | null
   onHover: (index: number | null) => void
@@ -21,7 +22,7 @@ const CY_RATIO = 0.52
 
 export function MapViz({
   stations, width, height,
-  activeGroupKeys, hoveredIndex, selectedIndex,
+  isFiltering, activeIndices, hoveredIndex, selectedIndex,
   onHover, onSelect, onDeselect,
 }: MapVizProps) {
   const cx = width * CX_RATIO
@@ -45,7 +46,8 @@ export function MapViz({
       <MapBackground width={width} height={height} cx={cx} cy={cy} />
       <MapDots
         stations={stations}
-        activeGroupKeys={activeGroupKeys}
+        isFiltering={isFiltering}
+        activeIndices={activeIndices}
         hoveredIndex={hoveredIndex}
         selectedIndex={selectedIndex}
         onHover={onHover}
