@@ -66,14 +66,20 @@ export default function App() {
   const [hoveredIndex, setHoveredIndex]   = useState<number | null>(null)
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
 
-  // Restore selection from URL on mount (after stations load)
+  // Restore selection from URL on mount (after stations load).
+  // Case-insensitive match ensures URLs work regardless of casing.
   useEffect(() => {
     if (stations.length === 0) return
     const params = new URLSearchParams(window.location.search)
     const name = params.get('station')
     if (!name) return
-    const match = stations.find((s) => s.name.toLowerCase() === name.toLowerCase())
-    if (match) setSelectedIndex(match.stationIndex)
+    const decoded = decodeURIComponent(name)
+    const match = stations.find((s) => s.name.toLowerCase() === decoded.toLowerCase())
+    if (match) {
+      setSelectedIndex(match.stationIndex)
+      // Normalise URL to use the canonical station name
+      window.history.replaceState(null, '', `?station=${encodeURIComponent(match.name)}`)
+    }
   }, [stations])
 
   const handleHover    = useCallback((i: number | null) => setHoveredIndex(i), [])
@@ -140,15 +146,18 @@ export default function App() {
     return counts
   }, [stations])
 
+  // Index lookup map — O(1) instead of O(n) per render
+  const stationByIndex = useMemo(() => {
+    const map = new Map<number, MapStation>()
+    for (const s of stations) map.set(s.stationIndex, s)
+    return map
+  }, [stations])
+
   const selectedStation: MapStation | null =
-    selectedIndex !== null
-      ? (stations.find((s) => s.stationIndex === selectedIndex) ?? null)
-      : null
+    selectedIndex !== null ? (stationByIndex.get(selectedIndex) ?? null) : null
 
   const hoveredStation: MapStation | null =
-    hoveredIndex !== null
-      ? (stations.find((s) => s.stationIndex === hoveredIndex) ?? null)
-      : null
+    hoveredIndex !== null ? (stationByIndex.get(hoveredIndex) ?? null) : null
 
   if (error) {
     return (

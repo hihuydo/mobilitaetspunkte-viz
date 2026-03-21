@@ -24,12 +24,19 @@ interface MapBackgroundProps {
 
 export function MapBackground({ width, height, cx, cy, hoveredDistrict, onDistrictHover, stations }: MapBackgroundProps) {
   const [geojson, setGeojson] = useState<FeatureCollection | null>(null)
+  const [fetchError, setFetchError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(districtsUrl)
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`Failed to load districts: ${r.status}`)
+        return r.json()
+      })
       .then(setGeojson)
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err)
+        setFetchError(err instanceof Error ? err.message : 'Failed to load district data')
+      })
   }, [])
 
   // Build a D3 geo path generator that projects WGS84 → EPSG:25832 → screen coords
@@ -57,14 +64,17 @@ export function MapBackground({ width, height, cx, cy, hoveredDistrict, onDistri
     })
   }, [geojson, width, height])
 
-  // Station count per district (computed once per geojson+stations change)
+  // Station count per district — only recomputes when geojson or stations change,
+  // not when dimensions change (which would needlessly rebuild districtPaths).
   const districtCounts = useMemo(() => {
+    if (!geojson) return {} as Record<string, number>
     const counts: Record<string, number> = {}
-    for (const { name, feature } of districtPaths) {
+    for (const feature of geojson.features) {
+      const name = (feature.properties as { name: string }).name
       counts[name] = stations.filter((s) => geoContains(feature as GeoJSON.Feature, s.lonlat)).length
     }
     return counts
-  }, [districtPaths, stations])
+  }, [geojson, stations])
 
   const handleDistrictLeave = useCallback(() => onDistrictHover(null), [onDistrictHover])
 
@@ -87,6 +97,14 @@ export function MapBackground({ width, height, cx, cy, hoveredDistrict, onDistri
     `Q ${cx + 108} ${cy + 110} ${cx + 112} ${cy + 138}`,
     `Q ${cx + 110} ${cy + 190} ${cx + 108} ${cy + 244}`,
   ].join(' ')
+
+  if (fetchError) {
+    return (
+      <text x={cx} y={cy} textAnchor="middle" fill="var(--map-dot-tram)" fontSize={11} opacity={0.7}>
+        {fetchError}
+      </text>
+    )
+  }
 
   return (
     <>

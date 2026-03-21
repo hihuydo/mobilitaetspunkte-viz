@@ -1,5 +1,5 @@
 // src/components/SearchBar.tsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { levenshtein } from '../lib/levenshtein'
 import type { StationGeometry } from '../lib/layout'
 import { Input } from '@/components/ui/input'
@@ -23,16 +23,19 @@ function stationScore(query: string, name: string): number {
 export function SearchBar({ stations, searchQuery, onSearch }: SearchBarProps) {
   const [inputValue, setInputValue] = useState('')
   const [suggestions, setSuggestions] = useState<StationGeometry[]>([])
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Sync input when searchQuery changes externally (suggestion click path).
-  // Guard prevents echo: when user types, onSearch → App sets searchQuery to the same
-  // string → this effect fires but searchQuery === inputValue so nothing happens.
+  // Track previous searchQuery to detect external changes only
+  const prevSearchQueryRef = useRef(searchQuery)
   useEffect(() => {
-    if (searchQuery !== inputValue) {
-      setInputValue(searchQuery)
+    // Only sync when searchQuery changed externally (not from our own typing)
+    if (searchQuery !== prevSearchQueryRef.current) {
+      prevSearchQueryRef.current = searchQuery
+      if (searchQuery !== inputValue) {
+        setInputValue(searchQuery)
+      }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery])
+  }, [searchQuery, inputValue])
 
   // Clear suggestions when input returns to a state with substring matches
   useEffect(() => {
@@ -47,7 +50,7 @@ export function SearchBar({ stations, searchQuery, onSearch }: SearchBarProps) {
     }
   }, [inputValue, stations])
 
-  const runSearch = (query: string) => {
+  const runSearch = useCallback((query: string) => {
     if (query === '') {
       onSearch('', new Set())
       setSuggestions([])
@@ -63,6 +66,7 @@ export function SearchBar({ stations, searchQuery, onSearch }: SearchBarProps) {
       onSearch(query, new Set())
       return
     }
+    // Fuzzy search via levenshtein — only runs for short non-matching queries
     const scored = stations.map((s) => ({ s, score: stationScore(query, s.name) }))
     const minScore = Math.min(...scored.map((x) => x.score))
     const topMatches = scored
@@ -72,12 +76,28 @@ export function SearchBar({ stations, searchQuery, onSearch }: SearchBarProps) {
       .slice(0, 2)
     onSearch(query, new Set())
     setSuggestions(topMatches)
-  }
+  }, [stations, onSearch])
 
   const handleChange = (value: string) => {
     setInputValue(value)
-    runSearch(value)
+    prevSearchQueryRef.current = value
+
+    // Debounce fuzzy search (150ms) to avoid scoring all stations on every keystroke
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    // Immediate search for substring matches (cheap), debounce fuzzy scoring
+    const q = value.toLowerCase()
+    const hasSubstring = value !== '' && stations.some((s) => s.name.toLowerCase().includes(q))
+    if (value === '' || hasSubstring) {
+      runSearch(value)
+    } else {
+      debounceRef.current = setTimeout(() => runSearch(value), 150)
+    }
   }
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  }, [])
 
   const handleClear = () => {
     setInputValue('')

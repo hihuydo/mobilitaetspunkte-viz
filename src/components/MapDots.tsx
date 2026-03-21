@@ -1,5 +1,5 @@
 // src/components/MapDots.tsx
-import { useCallback } from 'react'
+import { memo, useCallback } from 'react'
 import type { MapStation } from '../lib/mapLayout'
 
 interface MapDotsProps {
@@ -13,7 +13,7 @@ interface MapDotsProps {
   zoomScale?: number
 }
 
-export function MapDots({
+export const MapDots = memo(function MapDots({
   stations,
   isFiltering,
   activeIndices,
@@ -103,4 +103,4 @@ export function MapDots({
       })}
     </g>
   )
-}
+})

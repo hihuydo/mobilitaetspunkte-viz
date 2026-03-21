@@ -42,25 +42,34 @@ export function parseCSV(csvText: string): Station[] {
     skipEmptyLines: true,
   })
 
-  return result.data.map((row) => {
-    const services: Record<string, boolean> = {}
-    for (const field of BOOL_FIELDS) {
-      services[field] = row[field] === 'Ja'
-    }
-    const shape = row['shape'] ?? ''
-    const match = shape.match(/POINT \(([0-9.]+) ([0-9.]+)\)/)
-    const coords = match
-      ? { x: parseFloat(match[1]), y: parseFloat(match[2]) }
-      : null
+  return result.data
+    .filter((row) => {
+      // Skip rows missing required fields — fail fast instead of creating invalid records
+      const name = row['name']
+      const shape = row['shape']
+      if (!name || name.trim() === '') return false
+      if (!shape || !shape.includes('POINT')) return false
+      return true
+    })
+    .map((row) => {
+      const services: Record<string, boolean> = {}
+      for (const field of BOOL_FIELDS) {
+        services[field] = row[field] === 'Ja'
+      }
+      const shape = row['shape'] ?? ''
+      const match = shape.match(/POINT \(([0-9.]+) ([0-9.]+)\)/)
+      const coords = match
+        ? { x: parseFloat(match[1]), y: parseFloat(match[2]) }
+        : null
 
-    return {
-      name: row['name'] ?? '',
-      adresse: row['adresse'] ?? '',
-      anzStellplCs: parseInt(row['anz_stellpl_cs'] ?? '0', 10) || 0,
-      coords,
-      services,
-    }
-  })
+      return {
+        name: row['name'] ?? '',
+        adresse: row['adresse'] ?? '',
+        anzStellplCs: parseInt(row['anz_stellpl_cs'] ?? '0', 10) || 0,
+        coords,
+        services,
+      }
+    })
 }
 
 export function groupStations(stations: Station[]): StationGroup[] {

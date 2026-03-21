@@ -1,6 +1,6 @@
 // src/components/MapViz.tsx
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { zoom as d3Zoom, select, type ZoomTransform, zoomIdentity } from 'd3'
+import { zoom as d3Zoom, select, type ZoomTransform, type ZoomBehavior, zoomIdentity } from 'd3'
 import { MapBackground } from './MapBackground'
 import { MapDots } from './MapDots'
 import type { MapStation } from '../lib/mapLayout'
@@ -35,9 +35,10 @@ export function MapViz({
 
   const svgRef = useRef<SVGSVGElement>(null)
   const gRef = useRef<SVGGElement>(null)
+  const zoomRef = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(null)
   const [transform, setTransform] = useState<ZoomTransform>(zoomIdentity)
 
-  // d3-zoom setup
+  // d3-zoom setup — single instance stored in ref, reused by zoom controls
   useEffect(() => {
     const svg = svgRef.current
     if (!svg || width === 0 || height === 0) return
@@ -49,47 +50,40 @@ export function MapViz({
         setTransform(event.transform)
       })
 
+    zoomRef.current = zoomBehavior
+
     const sel = select(svg)
     sel.call(zoomBehavior)
 
     // Prevent zoom from triggering deselect
     sel.on('click.zoom', null)
 
-    return () => { sel.on('.zoom', null) }
+    return () => {
+      sel.on('.zoom', null)
+      zoomRef.current = null
+    }
   }, [width, height])
 
   const handleZoomIn = useCallback(() => {
     const svg = svgRef.current
-    if (!svg) return
-    const sel = select(svg)
-    const zoomBehavior = d3Zoom<SVGSVGElement, unknown>()
-      .scaleExtent([1, 6])
-      .translateExtent([[0, 0], [width, height]])
-      .on('zoom', (event) => setTransform(event.transform))
-    sel.transition().duration(300).call(zoomBehavior.scaleBy, 1.5)
-  }, [width, height])
+    const zoomBehavior = zoomRef.current
+    if (!svg || !zoomBehavior) return
+    select(svg).transition().duration(300).call(zoomBehavior.scaleBy, 1.5)
+  }, [])
 
   const handleZoomOut = useCallback(() => {
     const svg = svgRef.current
-    if (!svg) return
-    const sel = select(svg)
-    const zoomBehavior = d3Zoom<SVGSVGElement, unknown>()
-      .scaleExtent([1, 6])
-      .translateExtent([[0, 0], [width, height]])
-      .on('zoom', (event) => setTransform(event.transform))
-    sel.transition().duration(300).call(zoomBehavior.scaleBy, 0.67)
-  }, [width, height])
+    const zoomBehavior = zoomRef.current
+    if (!svg || !zoomBehavior) return
+    select(svg).transition().duration(300).call(zoomBehavior.scaleBy, 0.67)
+  }, [])
 
   const handleReset = useCallback(() => {
     const svg = svgRef.current
-    if (!svg) return
-    const sel = select(svg)
-    const zoomBehavior = d3Zoom<SVGSVGElement, unknown>()
-      .scaleExtent([1, 6])
-      .translateExtent([[0, 0], [width, height]])
-      .on('zoom', (event) => setTransform(event.transform))
-    sel.transition().duration(300).call(zoomBehavior.transform, zoomIdentity)
-  }, [width, height])
+    const zoomBehavior = zoomRef.current
+    if (!svg || !zoomBehavior) return
+    select(svg).transition().duration(300).call(zoomBehavior.transform, zoomIdentity)
+  }, [])
 
   const zoomScale = transform.k
 
