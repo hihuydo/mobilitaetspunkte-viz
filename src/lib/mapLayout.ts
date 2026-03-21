@@ -7,8 +7,8 @@ import { createProjection } from './mapProjection'
 const WGS84 = '+proj=longlat +datum=WGS84 +no_defs'
 const EPSG25832 = '+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
 
-export const DOT_MIN_R = 4
-export const DOT_MAX_R = 16
+export const DOT_MIN_R = 3
+export const DOT_MAX_R = 11
 
 export interface MapStation {
   stationIndex: number
