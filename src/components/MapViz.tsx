@@ -35,14 +35,7 @@ export function MapViz({
       onClick={onDeselect}
     >
       <defs>
-        <filter id="map-glow-dot" x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur stdDeviation="1.8" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <filter id="map-glow-selected" x="-80%" y="-80%" width="260%" height="260%">
-          <feGaussianBlur stdDeviation="4" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
+        {/* Transit line glow only — dots use a glow-ring approach instead */}
         <filter id="map-glow-line" x="-20%" y="-200%" width="140%" height="500%">
           <feGaussianBlur stdDeviation="1.2" result="blur"/>
           <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
