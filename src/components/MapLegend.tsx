@@ -28,8 +28,8 @@ export function MapLegend() {
         ))}
       </div>
 
-      {/* Bottom-right: size legend */}
-      <div className="absolute bottom-4 right-4 text-[10px] text-right pointer-events-none" style={{ color: 'var(--map-text-muted)' }}>
+      {/* Bottom-center: size legend (offset from right to avoid zoom buttons) */}
+      <div className="absolute bottom-4 right-16 text-[10px] text-right pointer-events-none" style={{ color: 'var(--map-text-muted)' }}>
         <svg width="80" height="36" viewBox="0 0 80 36" className="block ml-auto mb-0.5">
           <circle cx="8"  cy="31" r="4"  fill="#557799" opacity="0.8"/>
           <circle cx="26" cy="28" r="7"  fill="#557799" opacity="0.8"/>

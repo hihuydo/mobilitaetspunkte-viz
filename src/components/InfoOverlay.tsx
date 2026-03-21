@@ -2,7 +2,7 @@
 import { useState } from 'react'
 
 export function InfoOverlay() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
 
   return (
     <div className="absolute top-3.5 left-3.5 z-10">
@@ -24,7 +24,7 @@ export function InfoOverlay() {
       {/* Panel */}
       {open && (
         <div
-          className="mt-1.5 w-[240px] rounded-lg border p-3.5 text-[11px] leading-relaxed"
+          className="mt-1.5 w-[260px] rounded-lg border p-3.5 text-[11px] leading-relaxed"
           style={{
             background: 'var(--map-surface)',
             borderColor: 'var(--map-border)',
@@ -32,36 +32,32 @@ export function InfoOverlay() {
           }}
         >
           <h3 className="text-[10px] font-bold uppercase tracking-[.06em] mb-2" style={{ color: '#8ab0cc' }}>
-            Über diese Karte
-          </h3>
-          <p style={{ color: 'var(--map-text-muted)' }}>
-            Diese Karte zeigt alle{' '}
-            <strong style={{ color: '#8ab0cc' }}>137 Münchner Mobilitätspunkte</strong> —
-            öffentliche Knotenpunkte, an denen verschiedene Verkehrsmittel zusammenkommen.
-          </p>
-          <p className="mt-2" style={{ color: 'var(--map-text-muted)' }}>
-            Die <strong style={{ color: '#8ab0cc' }}>Größe</strong> eines Punktes zeigt,
-            wie viele der 11 möglichen Dienste dort verfügbar sind.
-          </p>
-
-          <h3 className="text-[10px] font-bold uppercase tracking-[.06em] mt-3 mb-2" style={{ color: '#8ab0cc' }}>
-            So funktioniert's
+            Anleitung
           </h3>
           {[
-            ['🔍', 'Suche nach einer Station über das Suchfeld'],
-            ['🔵', 'Filtere nach Verkehrsmitteln mit den Chips rechts'],
-            ['👆', 'Klicke auf einen Punkt für Details und Gruppenvergleich'],
-            ['🎨', 'Farben zeigen die primäre Anbindung: S-Bahn, U-Bahn, Tram, Bus'],
-          ].map(([icon, text]) => (
+            ['🔍', 'Suche', 'Tippe einen Stationsnamen in die Suchleiste oben.'],
+            ['🎛️', 'Filtern', 'Nutze die Gruppe- und Dienste-Chips, um gezielt nach Verkehrsmitteln oder Services zu filtern. Mehrere Dienste = nur Stationen mit allen.'],
+            ['👆', 'Details', 'Klicke auf einen Punkt auf der Karte. Rechts erscheint ein Vergleich mit Gruppendurchschnitt und allen verfügbaren Diensten.'],
+            ['🔎', 'Zoom', 'Scrolle zum Zoomen oder nutze die + / − Buttons unten rechts. Ziehe die Karte zum Verschieben.'],
+            ['🎨', 'Farben & Größe', 'Farbe = primäre ÖPNV-Anbindung (S-Bahn, U-Bahn, Tram, Bus). Größe = Anzahl verfügbarer Dienste (1–11).'],
+            ['📊', 'Überblick', 'Ohne Auswahl zeigt das rechte Panel Gesamtstatistiken: Gruppen-Verteilung, häufigste und seltenste Dienste.'],
+          ].map(([icon, title, text]) => (
             <div
-              key={text as string}
-              className="flex items-start gap-1.5 p-1.5 rounded mb-1.5"
+              key={title as string}
+              className="flex items-start gap-1.5 p-1.5 rounded mb-1"
               style={{ background: '#0b1420', color: 'var(--map-text-dim)' }}
             >
               <span className="flex-shrink-0">{icon}</span>
-              <span>{text}</span>
+              <span>
+                <strong style={{ color: '#8ab0cc' }}>{title}</strong>
+                {' — '}{text}
+              </span>
             </div>
           ))}
+
+          <p className="mt-2 text-[9px]" style={{ color: 'var(--map-text-dim)' }}>
+            Klicke erneut auf <em>i</em> um dieses Panel zu schließen.
+          </p>
         </div>
       )}
     </div>

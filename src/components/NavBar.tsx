@@ -19,13 +19,13 @@ export function NavBar({ searchQuery, onSearch, stationCount, matchCount, isFilt
       {/* Left: Title + subtitle */}
       <div className="flex flex-col">
         <span
-          className="text-[12px] font-bold uppercase tracking-[.06em] whitespace-nowrap"
+          className="text-[15px] font-bold uppercase tracking-[.06em] whitespace-nowrap"
           style={{ color: 'var(--map-text-primary)' }}
         >
           Münchner Mobilitätspunkte
         </span>
         <span
-          className="text-[9px] whitespace-nowrap"
+          className="text-[11px] whitespace-nowrap"
           style={{ color: 'var(--map-text-dim)' }}
         >
           {isFiltering
@@ -35,7 +35,7 @@ export function NavBar({ searchQuery, onSearch, stationCount, matchCount, isFilt
       </div>
 
       {/* Center: Search */}
-      <div className="relative w-full max-w-[360px] justify-self-center">
+      <div className="relative w-full max-w-[480px] justify-self-center">
         <Search
           size={13}
           className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
