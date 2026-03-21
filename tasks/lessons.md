@@ -119,6 +119,20 @@
 - Besser: direkt von `geojson` + `stations` abhängen — unabhängig von Screen-Dimensionen
 - Faustregel: Memo-Deps sollten die tatsächliche Daten-Abhängigkeit abbilden, nicht die Compute-Chain
 
+## Dot Size Tuning
+
+- Dot radii are controlled by `DOT_MIN_R` / `DOT_MAX_R` in `src/lib/mapLayout.ts`
+- Scale: `scaleSqrt().domain([0, 11]).range([MIN, MAX])` — sqrt keeps small dots readable
+- Good defaults: MIN=3, MAX=11 (previous: 4/16 was too dense at default zoom)
+- Also adjust glow ring offsets in MapDots.tsx if changing MAX significantly
+
+## Stale HMR Errors (MapDots.tsx)
+
+- Every session shows `[hmr] Failed to reload /src/components/MapDots.tsx` errors in console
+- These are stale from a previous HMR session and do NOT reflect the current file state
+- Verification: `pnpm build` passes cleanly; screenshots confirm correct rendering
+- Safe to ignore — reload the dev server page if they cause concern
+
 ## Worktree
 
 - Branch: `feature/map-viz` at `.worktrees/map-viz` (merged to main)

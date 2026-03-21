@@ -29,6 +29,9 @@
 - [x] Textfarben aufgehellt (map-text-muted, map-text-dim) für bessere Lesbarkeit
 - [x] Schriftgrößen erhöht (filter bar, nav, detail panel, legend)
 - [x] Umbenennung: Gruppe → Anschluss, Dienste → Mobilitätsangebote
+- [x] Detail panel: Alle Mobilitätsangebote vor Mobilitätsangebote im Vergleich
+- [x] Rename: Sonstige → Kein ÖPNV (beschreibt fehlenden ÖPNV-Anschluss)
+- [x] Dot-Größe reduziert: DOT_MIN_R 4→3, DOT_MAX_R 16→11
 
 ## Next
 - [ ] Deploy to Vercel
