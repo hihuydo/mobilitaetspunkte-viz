@@ -77,6 +77,48 @@
 - Faustregel für diese Palette: Muted-Text muss mindestens bei ~#7a90a8 liegen für 3:1, ~#8aacc4 für 4.5:1
 - Primärfarbe (#d0ccc8) hat ausreichend Kontrast
 
+## Code Review Patterns (2026-03-21)
+
+### D3 Zoom: Nie mehrfach instanziieren
+- d3.zoom() in `useCallback` handlers neu zu erstellen erzeugt getrennte Zoom-States → inconsistente Transitions
+- Pattern: einmal in `useEffect` erstellen, in `useRef` speichern, in Callbacks über `zoomRef.current` zugreifen
+- Cleanup: `zoomRef.current = null` im Effect-Return setzen
+
+### Fetch-Errors in UI anzeigen
+- `fetch().catch(console.error)` ist ein Anti-Pattern — User sieht nichts wenn Daten fehlen
+- Pattern: `useState<string | null>(null)` für Error-State, in Catch setzen, in JSX rendern
+- HTTP-Status prüfen: `if (!r.ok) throw new Error(...)` — fetch rejected nur bei Netzwerkfehlern, nicht bei 4xx/5xx
+
+### React.memo für SVG-Heavy Components
+- SVG-Komponenten mit 100+ Elementen (MapDots) profitieren stark von `React.memo`
+- Voraussetzung: Eltern muss stabile Referenzen übergeben (`useCallback`, `useMemo`)
+- Set<number> als Prop: referentielle Gleichheit nur wenn im Eltern memoized
+
+### ESLint exhaustive-deps: Nie suppressen, stattdessen fixen
+- `eslint-disable-next-line react-hooks/exhaustive-deps` → fast immer ein Bug
+- Für "sync von außen"-Pattern: `useRef` für previous value tracken, Effect mit allen Deps
+- Pattern: `prevRef.current` vergleichen um externe vs. eigene Änderungen zu unterscheiden
+
+### Debounce für teure Berechnungen in Event-Handlern
+- Levenshtein über alle Stations bei jedem Keystroke → 50ms+ Latenz
+- Pattern: billige Operationen (substring match) sofort, teure (fuzzy scoring) mit 150ms debounce
+- `useRef` für Timer, Cleanup im Unmount-Effect
+
+### Station-Lookup: Map statt Array.find()
+- `stations.find(s => s.stationIndex === i)` ist O(n) pro Render
+- Pattern: `useMemo(() => new Map(stations.map(s => [s.stationIndex, s])), [stations])`
+- Dann `stationByIndex.get(i)` → O(1)
+
+### CSV-Parsing: Validierung vor Transformation
+- Papa.parse gibt leere Strings für fehlende Felder zurück — keine Exception
+- Pattern: `.filter()` vor `.map()` — Rows ohne Pflichtfelder (name, shape) rauswerfen
+- Verhindert stille Invalid Records die downstream Bugs verursachen
+
+### useMemo-Dependencies: So spezifisch wie möglich
+- `districtCounts` hing von `districtPaths` ab (recalculated bei jeder Dimension-Änderung)
+- Besser: direkt von `geojson` + `stations` abhängen — unabhängig von Screen-Dimensionen
+- Faustregel: Memo-Deps sollten die tatsächliche Daten-Abhängigkeit abbilden, nicht die Compute-Chain
+
 ## Worktree
 
 - Branch: `feature/map-viz` at `.worktrees/map-viz` (merged to main)
