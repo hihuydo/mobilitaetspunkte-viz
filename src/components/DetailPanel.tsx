@@ -60,12 +60,12 @@ function IdleContent({ allStations, onFilterService }: { allStations: MapStation
       <Separator className="my-3.5 mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
 
       <div className="px-[18px] pb-3.5">
-        <p className="text-[10px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Gesamt</p>
+        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Gesamt</p>
         <div className="flex items-baseline gap-1.5 mb-1">
           <span className="text-[42px] font-black leading-none tracking-[-0.04em]" style={{ color: 'var(--map-text-primary)' }}>{totalCount}</span>
-          <span className="text-[13px]" style={{ color: 'var(--map-text-muted)' }}>Stationen</span>
+          <span className="text-[14px]" style={{ color: 'var(--map-text-muted)' }}>Stationen</span>
         </div>
-        <p className="text-[11px]" style={{ color: 'var(--map-text-dim)' }}>
+        <p className="text-[13px]" style={{ color: 'var(--map-text-dim)' }}>
           Ø {avgServices.toLocaleString('de-DE', { maximumFractionDigits: 1 })} Dienste pro Station
         </p>
       </div>
@@ -73,14 +73,14 @@ function IdleContent({ allStations, onFilterService }: { allStations: MapStation
       <Separator className="mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
 
       <div className="px-[18px] py-4">
-        <p className="text-[10px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Nach Gruppe</p>
+        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Nach Gruppe</p>
         {groupCounts.map(({ key, label, count, color: gColor }) => (
           <div key={key} className="flex items-center gap-2 mb-1.5">
-            <span className="text-[10px] w-[64px] flex-shrink-0" style={{ color: gColor }}>{label}</span>
+            <span className="text-[12px] w-[64px] flex-shrink-0" style={{ color: gColor }}>{label}</span>
             <div className="flex-1 h-1 rounded-sm" style={{ background: 'var(--map-border)' }}>
               <div className="h-1 rounded-sm" style={{ width: `${(count / maxGroupCount) * 100}%`, background: gColor }} />
             </div>
-            <span className="text-[10px] w-6 text-right" style={{ color: 'var(--map-text-muted)' }}>{count}</span>
+            <span className="text-[12px] w-6 text-right" style={{ color: 'var(--map-text-muted)' }}>{count}</span>
           </div>
         ))}
       </div>
@@ -88,14 +88,14 @@ function IdleContent({ allStations, onFilterService }: { allStations: MapStation
       <Separator className="mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
 
       <div className="px-[18px] py-4">
-        <p className="text-[10px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Häufigste Dienste</p>
+        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Häufigste Dienste</p>
         {topServices.map(({ field, label, color: sColor, count }) => (
           <div key={field} className="flex items-center gap-2 mb-1.5">
-            <span className="text-[10px] w-[80px] flex-shrink-0 truncate" style={{ color: 'var(--map-text-muted)' }}>{label}</span>
+            <span className="text-[12px] w-[80px] flex-shrink-0 truncate" style={{ color: 'var(--map-text-muted)' }}>{label}</span>
             <div className="flex-1 h-1 rounded-sm" style={{ background: 'var(--map-border)' }}>
               <div className="h-1 rounded-sm" style={{ width: `${(count / maxServiceCount) * 100}%`, background: sColor }} />
             </div>
-            <span className="text-[10px] w-6 text-right tabular-nums" style={{ color: 'var(--map-text-muted)' }}>{count}</span>
+            <span className="text-[12px] w-6 text-right tabular-nums" style={{ color: 'var(--map-text-muted)' }}>{count}</span>
             {onFilterService && (
               <button
                 onClick={() => onFilterService(field)}
@@ -113,14 +113,14 @@ function IdleContent({ allStations, onFilterService }: { allStations: MapStation
       <Separator className="mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
 
       <div className="px-[18px] py-4">
-        <p className="text-[10px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Seltenste Dienste</p>
+        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Seltenste Dienste</p>
         {rarestServices.map(({ field, label, color: sColor, count }) => (
           <div key={field} className="flex items-center gap-2 mb-1.5">
-            <span className="text-[10px] w-[80px] flex-shrink-0 truncate" style={{ color: 'var(--map-text-muted)' }}>{label}</span>
+            <span className="text-[12px] w-[80px] flex-shrink-0 truncate" style={{ color: 'var(--map-text-muted)' }}>{label}</span>
             <div className="flex-1 h-1 rounded-sm" style={{ background: 'var(--map-border)' }}>
               <div className="h-1 rounded-sm" style={{ width: `${(count / maxServiceCount) * 100}%`, background: sColor }} />
             </div>
-            <span className="text-[10px] w-6 text-right tabular-nums" style={{ color: 'var(--map-text-muted)' }}>{count}</span>
+            <span className="text-[12px] w-6 text-right tabular-nums" style={{ color: 'var(--map-text-muted)' }}>{count}</span>
             {onFilterService && (
               <button
                 onClick={() => onFilterService(field)}
@@ -157,17 +157,17 @@ function StationContent({ station, allStations }: { station: MapStation; allStat
           {station.name}
         </h2>
         {station.adresse && (
-          <p className="text-[10px] mt-1" style={{ color: 'var(--map-text-dim)' }}>{station.adresse}</p>
+          <p className="text-[12px] mt-1" style={{ color: 'var(--map-text-dim)' }}>{station.adresse}</p>
         )}
       </div>
 
       <Separator className="my-3.5 mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
 
       <div className="px-[18px] pb-3.5">
-        <p className="text-[10px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Dienste im Vergleich</p>
+        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Dienste im Vergleich</p>
         <div className="flex items-baseline gap-1.5 mb-3">
           <span className="text-[42px] font-black leading-none tracking-[-0.04em]" style={{ color }}>{station.serviceCount}</span>
-          <span className="text-[13px]" style={{ color: 'var(--map-text-muted)' }}>von 11</span>
+          <span className="text-[14px]" style={{ color: 'var(--map-text-muted)' }}>von 11</span>
         </div>
 
         {[
@@ -176,11 +176,11 @@ function StationContent({ station, allStations }: { station: MapStation; allStat
           { label: 'Ø Gesamt', value: totalAvg, fill: 'var(--map-border)' },
         ].map(({ label, value, fill }) => (
           <div key={label} className="flex items-center gap-2 mb-1.5">
-            <span className="text-[10px] w-[80px] flex-shrink-0" style={{ color: 'var(--map-text-muted)' }}>{label}</span>
+            <span className="text-[12px] w-[80px] flex-shrink-0" style={{ color: 'var(--map-text-muted)' }}>{label}</span>
             <div className="flex-1 h-1 rounded-sm" style={{ background: 'var(--map-border)' }}>
               <div className="h-1 rounded-sm" style={{ width: `${(value / maxCount) * 100}%`, background: fill }} />
             </div>
-            <span className="text-[10px] w-6 text-right" style={{ color: 'var(--map-text-muted)' }}>
+            <span className="text-[12px] w-6 text-right" style={{ color: 'var(--map-text-muted)' }}>
               {value.toLocaleString('de-DE', { maximumFractionDigits: 1 })}
             </span>
           </div>
@@ -201,7 +201,7 @@ function StationContent({ station, allStations }: { station: MapStation; allStat
       <Separator className="mx-[18px] w-auto" style={{ background: 'var(--map-border)' }} />
 
       <div className="px-[18px] py-4">
-        <p className="text-[10px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Alle Dienste</p>
+        <p className="text-[12px] uppercase tracking-[.1em] mb-2.5" style={{ color: 'var(--map-text-muted)' }}>Alle Dienste</p>
         <div className="grid grid-cols-2 gap-1">
           {SERVICE_DEFINITIONS.map((svc) => {
             const present = station.services[svc.field] === true
@@ -210,7 +210,7 @@ function StationContent({ station, allStations }: { station: MapStation; allStat
                 style={{ background: present ? '#0b1420' : 'transparent', opacity: present ? 1 : 0.22 }}>
                 <div className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                   style={{ background: present ? svc.color : 'var(--map-border)', boxShadow: present ? `0 0 3px ${svc.color}33` : 'none' }} />
-                <span className="text-[10px]" style={{ color: 'var(--map-text-primary)' }}>{svc.label}</span>
+                <span className="text-[12px]" style={{ color: 'var(--map-text-primary)' }}>{svc.label}</span>
               </div>
             )
           })}

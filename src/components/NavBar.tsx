@@ -19,13 +19,13 @@ export function NavBar({ searchQuery, onSearch, stationCount, matchCount, isFilt
       {/* Title + subtitle */}
       <div className="flex flex-col">
         <span
-          className="text-[13px] md:text-[15px] font-bold uppercase tracking-[.06em] whitespace-nowrap"
+          className="text-[15px] md:text-[17px] font-bold uppercase tracking-[.06em] whitespace-nowrap"
           style={{ color: 'var(--map-text-primary)' }}
         >
           Münchner Mobilitätspunkte
         </span>
         <span
-          className="text-[10px] md:text-[11px] whitespace-nowrap"
+          className="text-[12px] md:text-[13px] whitespace-nowrap"
           style={{ color: 'var(--map-text-dim)' }}
         >
           {isFiltering
@@ -45,7 +45,7 @@ export function NavBar({ searchQuery, onSearch, stationCount, matchCount, isFilt
           value={searchQuery}
           onChange={(e) => onSearch(e.target.value)}
           placeholder="Station suchen…"
-          className="pl-8 pr-12 text-[12px] h-8 rounded-lg border focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="pl-8 pr-12 text-[13px] h-9 rounded-lg border focus-visible:ring-0 focus-visible:ring-offset-0"
           style={{
             background: '#0b1018',
             borderColor: 'var(--map-border)',
@@ -54,7 +54,7 @@ export function NavBar({ searchQuery, onSearch, stationCount, matchCount, isFilt
         />
         {searchQuery !== '' && (
           <span
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] tabular-nums pointer-events-none"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[12px] tabular-nums pointer-events-none"
             style={{ color: 'var(--map-text-dim)' }}
           >
             {matchCount}

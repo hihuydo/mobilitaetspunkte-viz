@@ -70,7 +70,7 @@ export function ServiceFilter({
     >
       {/* ── Group label ─────────────────────────────────────────── */}
       <span
-        className="text-[9px] uppercase tracking-widest whitespace-nowrap"
+        className="text-[11px] uppercase tracking-widest whitespace-nowrap"
         style={{ color: 'var(--map-text-dim)' }}
       >
         Gruppe
@@ -93,12 +93,12 @@ export function ServiceFilter({
             <button
               key={chip.key}
               onClick={() => onToggleGroup(chip.key)}
-              className="flex items-center gap-1 text-[10px] tracking-wide px-2.5 py-0.5 rounded-full border whitespace-nowrap transition-colors"
+              className="flex items-center gap-1 text-[12px] tracking-wide px-3 py-1 rounded-full border whitespace-nowrap transition-colors"
               style={style}
             >
               {chip.label}
               {groupCounts && (
-                <span className="text-[9px] opacity-60">({count})</span>
+                <span className="text-[10px] opacity-60">({count})</span>
               )}
             </button>
           )
@@ -112,14 +112,14 @@ export function ServiceFilter({
       <div className="relative flex-shrink-0" ref={dropdownRef}>
         <button
           onClick={() => setShowServices((v) => !v)}
-          className="flex items-center gap-1 text-[10px] tracking-wide px-2.5 py-0.5 rounded-full border whitespace-nowrap transition-colors"
+          className="flex items-center gap-1 text-[12px] tracking-wide px-3 py-1 rounded-full border whitespace-nowrap transition-colors"
           style={
             activeServices.size > 0
               ? { background: '#ffffff10', color: 'var(--map-text-primary)', borderColor: 'var(--map-border)' }
               : { background: 'transparent', color: 'var(--map-text-muted)', borderColor: 'var(--map-border)' }
           }
         >
-          <span className="text-[9px] uppercase tracking-widest" style={{ color: 'var(--map-text-dim)' }}>
+          <span className="text-[11px] uppercase tracking-widest" style={{ color: 'var(--map-text-dim)' }}>
             Dienste
           </span>
           {activeServices.size > 0 && (
@@ -152,7 +152,7 @@ export function ServiceFilter({
                 <button
                   key={svc.field}
                   onClick={() => onToggleService(svc.field)}
-                  className="flex items-center gap-1 text-[10px] tracking-wide px-2 py-0.5 rounded-full border whitespace-nowrap transition-all"
+                  className="flex items-center gap-1 text-[12px] tracking-wide px-2.5 py-1 rounded-full border whitespace-nowrap transition-all"
                   style={
                     isActive
                       ? { background: `${hex}18`, color: hex, borderColor: `${hex}40` }
@@ -177,12 +177,12 @@ export function ServiceFilter({
       {/* ── Match counter + reset ───────────────────────────────── */}
       {isFiltering && (
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-[10px] tabular-nums" style={{ color: 'var(--map-text-muted)' }}>
+          <span className="text-[12px] tabular-nums" style={{ color: 'var(--map-text-muted)' }}>
             {matchCount} / {totalCount}
           </span>
           <button
             onClick={onReset}
-            className="flex items-center gap-0.5 text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded border transition-colors"
+            className="flex items-center gap-0.5 text-[11px] uppercase tracking-widest px-2 py-0.5 rounded border transition-colors"
             style={{ color: 'var(--map-text-dim)', borderColor: 'var(--map-border)' }}
           >
             <X size={10} />
