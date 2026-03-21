@@ -2,15 +2,21 @@
 import { useState } from 'react'
 
 export function InfoOverlay() {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
+  const [hasOpened, setHasOpened] = useState(false)
+
+  const handleToggle = () => {
+    setOpen((v) => !v)
+    if (!hasOpened) setHasOpened(true)
+  }
 
   return (
     <div className="absolute top-3.5 left-3.5 z-10">
-      {/* Toggle button */}
+      {/* Toggle button — pulses until first opened */}
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleToggle}
         title="Info & Anleitung"
-        className="w-7 h-7 rounded-full border flex items-center justify-center text-[13px] italic font-bold transition-colors"
+        className={`w-7 h-7 rounded-full border flex items-center justify-center text-[13px] italic font-bold transition-colors ${!hasOpened && !open ? 'info-pulse' : ''}`}
         style={{
           fontFamily: 'Georgia, serif',
           background: open ? '#0e1828' : '#0b1420',

@@ -238,3 +238,13 @@ svg text {
 .rings-interacting.rings-interactive .ring-pulse {
   animation-play-state: paused;
 }
+
+/* Info button pulse — draws attention until user opens it */
+@keyframes info-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(138, 176, 204, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(138, 176, 204, 0); }
+}
+
+.info-pulse {
+  animation: info-pulse 2s ease-in-out infinite;
+}
