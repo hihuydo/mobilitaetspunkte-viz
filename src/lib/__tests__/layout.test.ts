@@ -17,6 +17,7 @@ function makeGroups(counts: number[]): StationGroup[] {
         name: `Station ${j}`,
         adresse: 'Test St',
         anzStellplCs: 0,
+        coords: null,
         services: {
           s_bahn_vorhanden: i === 0,
           u_bahn_vorhanden: i === 1,

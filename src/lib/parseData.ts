@@ -5,6 +5,7 @@ export interface Station {
   name: string
   adresse: string
   anzStellplCs: number
+  coords: { x: number; y: number } | null
   services: Record<string, boolean>
 }
 
@@ -46,10 +47,17 @@ export function parseCSV(csvText: string): Station[] {
     for (const field of BOOL_FIELDS) {
       services[field] = row[field] === 'Ja'
     }
+    const shape = row['shape'] ?? ''
+    const match = shape.match(/POINT \(([0-9.]+) ([0-9.]+)\)/)
+    const coords = match
+      ? { x: parseFloat(match[1]), y: parseFloat(match[2]) }
+      : null
+
     return {
       name: row['name'] ?? '',
       adresse: row['adresse'] ?? '',
       anzStellplCs: parseInt(row['anz_stellpl_cs'] ?? '0', 10) || 0,
+      coords,
       services,
     }
   })
