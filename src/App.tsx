@@ -36,17 +36,19 @@ export default function App() {
   const [vizPhase, setVizPhase] = useState<VizPhase>('loading')
   const phaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Step 1: trigger reveal once layout is ready
   useEffect(() => {
-    if (layout && vizPhase === 'loading') {
-      setVizPhase('revealing')
-      phaseTimerRef.current = setTimeout(() => {
-        setVizPhase('interactive')
-      }, 2400)
-    }
+    if (layout) setVizPhase('revealing')
+  }, [layout])
+
+  // Step 2: transition to interactive after reveal duration
+  useEffect(() => {
+    if (vizPhase !== 'revealing') return
+    phaseTimerRef.current = setTimeout(() => setVizPhase('interactive'), 2400)
     return () => {
       if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current)
     }
-  }, [layout, vizPhase])
+  }, [vizPhase])
 
   // Hover state (gated on vizPhase)
   const [hoveredRingIndex, setHoveredRingIndex] = useState<number | null>(null)
